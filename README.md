@@ -797,6 +797,67 @@ bash ~/health-check.sh
 | `ModuleNotFoundError: bech32` | Python module missing | `pip install bech32` |
 | Service keeps restarting | Wrong KEY_NAME/CHAIN_ID/node not synced | Check `journalctl -u <service> -n 50` |
 | CPU inference too slow | No GPU | Normal (~77s vs ~8s). Consider GPU upgrade |
+| Peer timeout / `Error reconnecting to peer` | Stale peers or firewall blocking P2P | See fix below |
+
+### Fix: Peer Connection Timeout
+
+If you see errors like:
+```
+ERR Error dialing peer err="dial tcp 52.201.231.127:26656: i/o timeout"
+INF Error reconnecting to peer. Trying again addr=...
+```
+
+**Cause:** The default seed/persistent peers may be down or your VPS firewall blocks outbound port 26656.
+
+**Fix 1: Update peers**
+```bash
+# Get fresh peers from Republic Discord or a working node
+# If you have access to a synced node, extract live peers:
+curl -s http://<SYNCED_NODE_IP>:26657/net_info | \
+  jq -r '.result.peers[] | "\(.node_info.id)@\(.remote_ip):\(.node_info.listen_addr | split(":") | last)"' | \
+  paste -sd, -
+
+# Update config
+PEERS="<paste comma-separated peers here>"
+sed -i "s/^persistent_peers *=.*/persistent_peers = \"$PEERS\"/" \
+  ~/.republicd/config/config.toml
+
+# Restart node
+sudo systemctl restart republicd
+```
+
+**Fix 2: Open firewall**
+```bash
+# Ensure P2P port is open (both inbound and outbound)
+sudo ufw allow 26656/tcp
+sudo ufw allow out 26656/tcp
+
+# For cloud VPS: also check security group / network rules in your provider's dashboard
+# AWS: Security Group → Outbound Rules → Allow TCP 26656
+# GCP: Firewall Rules → Allow egress TCP 26656
+# Hetzner/Contabo: Usually open by default
+```
+
+**Fix 3: Use seeds instead of persistent_peers**
+```bash
+# Seeds are more reliable - node discovers peers automatically
+SEEDS="cd10f1a4162e3a4fadd6993a24fd5a32b27b8974@52.201.231.127:26656"
+sed -i "s/^seeds *=.*/seeds = \"$SEEDS\"/" ~/.republicd/config/config.toml
+sudo systemctl restart republicd
+```
+
+**Fix 4: Docker networking**
+
+If running in Docker, the container may not have proper network access:
+```bash
+# Use host network mode instead of bridge
+docker run --network host ...
+
+# Or in docker-compose.yml:
+services:
+  republicd:
+    network_mode: "host"
+```
 
 ### Useful commands
 
