@@ -859,6 +859,50 @@ services:
     network_mode: "host"
 ```
 
+### Fix: Auth Failure / Bucket Full
+
+If you see errors like:
+```
+ERR Error reconnecting to peer err="auth failure: secret conn failed"
+INF new bucket is full, expiring new book=...
+```
+
+**Cause:** Corrupted address book, or node ID mismatch after re-initialization.
+
+**Fix 1: Clear address book & restart**
+```bash
+# Stop node
+sudo systemctl stop republicd
+
+# Remove corrupted address book
+rm ~/.republicd/config/addrbook.json
+
+# Restart
+sudo systemctl start republicd
+```
+
+**Fix 2: Reset node data (if stuck)**
+```bash
+sudo systemctl stop republicd
+
+# Unsafe reset (keeps config + keys, clears chain data)
+republicd comet unsafe-reset-all --home ~/.republicd
+
+# Re-do state sync (Section 3.3) then restart
+sudo systemctl start republicd
+```
+
+**Fix 3: Check node key matches**
+```bash
+# Your node key must be consistent
+cat ~/.republicd/config/node_key.json | python3 -c "import json,sys;print('Node ID OK' if json.load(sys.stdin).get('priv_key') else 'MISSING')"
+
+# If missing/corrupted, generate new one:
+# republicd comet show-node-id --home ~/.republicd
+```
+
+> ⚠️ **Never delete `priv_validator_key.json`** — that's your validator signing key. Only delete `addrbook.json`.
+
 ### Useful commands
 
 ```bash
