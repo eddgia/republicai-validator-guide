@@ -1,0 +1,1170 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Republic Block Explorer</title>
+    <meta name="description"
+        content="Explore blocks, transactions, and validators on the RepublicAI blockchain network.">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #080810;
+            --bg2: #0c0c1a;
+            --bg3: #101028;
+            --bg4: #161638;
+            --border: #1a1a3a;
+            --border2: #252550;
+            --cyan: #00e5ff;
+            --cyan2: #00b8d4;
+            --cyan-g: rgba(0, 229, 255, .12);
+            --magenta: #ff00e5;
+            --magenta-g: rgba(255, 0, 229, .12);
+            --green: #00e676;
+            --green-g: rgba(0, 230, 118, .12);
+            --pink: #ff4081;
+            --pink-g: rgba(255, 64, 129, .12);
+            --yellow: #ffab40;
+            --purple: #b388ff;
+            --t1: #e8e8f0;
+            --t2: #8888aa;
+            --t3: #555578;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--t1);
+            min-height: 100vh;
+            overflow-x: hidden
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(ellipse at 15% 15%, rgba(0, 229, 255, .04), transparent 50%), radial-gradient(ellipse at 85% 85%, rgba(179, 136, 255, .03), transparent 50%);
+            pointer-events: none;
+            z-index: 0
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: linear-gradient(rgba(255, 255, 255, .01) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, .01) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: 0
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none
+        }
+
+        .mono {
+            font-family: 'JetBrains Mono', monospace
+        }
+
+        .orbitron {
+            font-family: 'Orbitron', sans-serif
+        }
+
+        /* NAV */
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(8, 8, 16, .88);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 0 2rem
+        }
+
+        .nav-in {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 60px
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 800;
+            font-size: 1.1rem;
+            cursor: pointer
+        }
+
+        .logo svg {
+            width: 28px;
+            height: 28px
+        }
+
+        .logo-sub {
+            font-size: .6rem;
+            color: var(--t3);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            line-height: 1;
+            margin-left: -2px
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2px
+        }
+
+        .nav-links a {
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: .88rem;
+            font-weight: 500;
+            color: var(--t2);
+            transition: all .2s;
+            border-bottom: 2px solid transparent
+        }
+
+        .nav-links a:hover {
+            color: var(--t1)
+        }
+
+        .nav-links a.active {
+            color: var(--cyan);
+            border-bottom-color: var(--cyan)
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 0 12px;
+            transition: border .2s
+        }
+
+        .search-box:focus-within {
+            border-color: var(--cyan2)
+        }
+
+        .search-box input {
+            background: none;
+            border: none;
+            outline: none;
+            color: var(--t1);
+            font-family: 'Inter';
+            font-size: .82rem;
+            padding: 9px 8px;
+            width: 220px
+        }
+
+        .search-box input::placeholder {
+            color: var(--t3)
+        }
+
+        .search-icon {
+            color: var(--t3);
+            flex-shrink: 0
+        }
+
+        /* LAYOUT */
+        main {
+            position: relative;
+            z-index: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem
+        }
+
+        .page {
+            display: none
+        }
+
+        .page.active {
+            display: block
+        }
+
+        /* HERO */
+        .hero {
+            padding: 3rem 0 2rem
+        }
+
+        .hero-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 1.5rem
+        }
+
+        .hero-logo svg {
+            width: 48px;
+            height: 48px
+        }
+
+        .hero-logo span {
+            font-family: 'Orbitron';
+            font-size: 2rem;
+            font-weight: 900;
+            letter-spacing: 2px
+        }
+
+        .hero-tagline {
+            font-family: 'Orbitron';
+            font-size: 2.2rem;
+            font-weight: 800;
+            line-height: 1.3;
+            margin-bottom: 1.2rem
+        }
+
+        .hero-tagline .cyan {
+            color: var(--cyan)
+        }
+
+        .hero-tagline .magenta {
+            color: var(--magenta)
+        }
+
+        .hero-tagline .green {
+            color: var(--green)
+        }
+
+        .hero-desc {
+            color: var(--t2);
+            font-size: 1rem;
+            line-height: 1.8;
+            max-width: 720px;
+            margin-bottom: 2rem
+        }
+
+        .hero-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem
+        }
+
+        .hero-stat {
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.2rem
+        }
+
+        .hero-stat-label {
+            font-size: .7rem;
+            color: var(--t3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 6px
+        }
+
+        .hero-stat-val {
+            font-family: 'Orbitron';
+            font-size: 1.5rem;
+            font-weight: 700
+        }
+
+        .hero-stat-val.cyan {
+            color: var(--cyan)
+        }
+
+        .hero-stat-val.green {
+            color: var(--green)
+        }
+
+        .hero-stat-val.purple {
+            color: var(--purple)
+        }
+
+        .hero-stat-val.magenta {
+            color: var(--magenta)
+        }
+
+        .hero-btns {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap
+        }
+
+        .hero-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 22px;
+            border-radius: 10px;
+            font-size: .85rem;
+            font-weight: 600;
+            border: 1px solid var(--border);
+            transition: all .25s;
+            cursor: pointer;
+            background: none;
+            color: var(--t2)
+        }
+
+        .hero-btn:hover {
+            border-color: var(--cyan);
+            color: var(--cyan);
+            background: var(--cyan-g)
+        }
+
+        .hero-btn.primary {
+            background: var(--cyan);
+            color: #000;
+            border-color: var(--cyan)
+        }
+
+        .hero-btn.primary:hover {
+            box-shadow: 0 0 20px rgba(0, 229, 255, .3)
+        }
+
+        /* NETWORK STATUS */
+        .net-status {
+            margin-top: 2rem
+        }
+
+        .net-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 1.2rem
+        }
+
+        .net-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--green);
+            box-shadow: 0 0 8px var(--green);
+            animation: pulse 2s infinite
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1
+            }
+
+            50% {
+                opacity: .5
+            }
+        }
+
+        .net-header h2 {
+            font-family: 'Orbitron';
+            font-size: 1.2rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px
+        }
+
+        .net-badge {
+            background: var(--cyan-g);
+            color: var(--cyan);
+            border: 1px solid rgba(0, 229, 255, .3);
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: .72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px
+        }
+
+        .net-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem
+        }
+
+        .net-card {
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 1.5rem;
+            transition: all .3s
+        }
+
+        .net-card:hover {
+            border-color: var(--border2);
+            transform: translateY(-2px)
+        }
+
+        .net-card-label {
+            font-size: .72rem;
+            color: var(--t3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px
+        }
+
+        .net-card-val {
+            font-family: 'Orbitron';
+            font-size: 1.8rem;
+            font-weight: 700
+        }
+
+        .net-card-sub {
+            font-size: .82rem;
+            color: var(--t2);
+            margin-top: 4px
+        }
+
+        /* CARD / LIST */
+        .card {
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+            margin-bottom: 1.5rem
+        }
+
+        .card-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.2rem 1.5rem;
+            border-bottom: 1px solid var(--border)
+        }
+
+        .card-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            font-size: 1rem
+        }
+
+        .card-sub {
+            font-size: .8rem;
+            color: var(--t3)
+        }
+
+        .live-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: .82rem;
+            color: var(--green);
+            background: var(--green-g);
+            padding: 5px 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(0, 230, 118, .2)
+        }
+
+        .live-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--green);
+            box-shadow: 0 0 6px var(--green);
+            animation: pulse 2s infinite
+        }
+
+        .refresh-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: .82rem;
+            color: var(--pink);
+            background: var(--pink-g);
+            padding: 6px 14px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 64, 129, .2);
+            cursor: pointer;
+            font-family: 'Inter';
+            font-weight: 600;
+            transition: all .2s
+        }
+
+        .refresh-btn:hover {
+            background: rgba(255, 64, 129, .2);
+            border-color: var(--pink)
+        }
+
+        /* ROWS */
+        .row-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid rgba(26, 26, 58, .4);
+            transition: background .15s;
+            cursor: pointer
+        }
+
+        .row-item:hover {
+            background: var(--bg4)
+        }
+
+        .row-item:last-child {
+            border-bottom: none
+        }
+
+        .row-left {
+            display: flex;
+            align-items: center;
+            gap: 14px
+        }
+
+        .row-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0
+        }
+
+        .row-icon.block {
+            background: var(--cyan-g);
+            color: var(--cyan)
+        }
+
+        .row-icon.tx {
+            background: var(--pink-g);
+            color: var(--pink)
+        }
+
+        .row-main {
+            display: flex;
+            flex-direction: column;
+            gap: 3px
+        }
+
+        .row-title {
+            font-family: 'Orbitron';
+            font-size: .95rem;
+            font-weight: 700;
+            color: var(--cyan)
+        }
+
+        .row-sub {
+            font-size: .78rem;
+            color: var(--t3);
+            font-family: 'JetBrains Mono'
+        }
+
+        .row-right {
+            text-align: right;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 4px
+        }
+
+        .row-time {
+            font-size: .82rem;
+            color: var(--t2)
+        }
+
+        .tx-badge {
+            font-size: .68rem;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 5px;
+            background: var(--green-g);
+            color: var(--green)
+        }
+
+        .tx-badge.multi {
+            background: var(--magenta-g);
+            color: var(--magenta)
+        }
+
+        /* TX LIST */
+        .tx-row {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr .6fr .5fr;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid rgba(26, 26, 58, .4);
+            transition: background .15s;
+            cursor: pointer;
+            gap: 12px
+        }
+
+        .tx-row:hover {
+            background: var(--bg4)
+        }
+
+        .tx-hash {
+            font-family: 'JetBrains Mono';
+            font-size: .82rem;
+            color: var(--cyan);
+            font-weight: 500
+        }
+
+        .tx-type {
+            font-size: .82rem;
+            color: var(--t2)
+        }
+
+        .tx-type span {
+            background: var(--bg4);
+            padding: 3px 8px;
+            border-radius: 5px;
+            font-size: .75rem;
+            color: var(--t1);
+            font-weight: 500
+        }
+
+        .tx-status {
+            font-size: .78rem
+        }
+
+        .tx-status.success {
+            color: var(--green)
+        }
+
+        .tx-status.fail {
+            color: var(--pink)
+        }
+
+        .tx-block {
+            font-family: 'JetBrains Mono';
+            font-size: .82rem;
+            color: var(--t2);
+            text-align: right
+        }
+
+        /* LOADING */
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+            gap: .8rem
+        }
+
+        .spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid var(--border);
+            border-top-color: var(--cyan);
+            border-radius: 50%;
+            animation: spin .7s linear infinite
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg)
+            }
+        }
+
+        .loading-text {
+            color: var(--t3);
+            font-size: .85rem
+        }
+
+        /* PAGE HEADERS */
+        .page-head {
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between
+        }
+
+        .page-head-left {
+            display: flex;
+            flex-direction: column;
+            gap: 6px
+        }
+
+        .page-head h1 {
+            font-family: 'Orbitron';
+            font-size: 1.8rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            display: flex;
+            align-items: center;
+            gap: 12px
+        }
+
+        .page-head h1 .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--cyan);
+            box-shadow: 0 0 8px var(--cyan)
+        }
+
+        .page-head p {
+            color: var(--t2);
+            font-size: .9rem
+        }
+
+        /* FOOTER */
+        footer {
+            position: relative;
+            z-index: 1;
+            max-width: 1400px;
+            margin: 3rem auto 0;
+            padding: 2rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center
+        }
+
+        .f-links {
+            display: flex;
+            gap: 1.5rem
+        }
+
+        .f-links a {
+            color: var(--t3);
+            font-size: .8rem;
+            transition: color .2s
+        }
+
+        .f-links a:hover {
+            color: var(--cyan)
+        }
+
+        .f-credit {
+            font-size: .75rem;
+            color: var(--t3)
+        }
+
+        /* RESPONSIVE */
+        @media(max-width:900px) {
+            .hero-stats {
+                grid-template-columns: repeat(2, 1fr)
+            }
+
+            .net-grid {
+                grid-template-columns: 1fr
+            }
+
+            .search-box {
+                display: none
+            }
+
+            .tx-row {
+                grid-template-columns: 1fr 1fr
+            }
+        }
+
+        @media(max-width:600px) {
+            main {
+                padding: 1rem
+            }
+
+            .hero-tagline {
+                font-size: 1.4rem
+            }
+
+            .hero-stats {
+                grid-template-columns: 1fr 1fr
+            }
+
+            .nav-links a {
+                padding: 6px 10px;
+                font-size: .78rem
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav>
+        <div class="nav-in">
+            <div class="logo" onclick="go('home')">
+                <svg viewBox="0 0 32 32" fill="none">
+                    <rect width="32" height="32" rx="8" fill="url(#lg)" />
+                    <path d="M10 11h4v10h-4zM18 11h4v10h-4z" fill="#000" />
+                    <path d="M14 14h4v4h-4z" fill="#000" />
+                    <defs>
+                        <linearGradient id="lg" x1="0" y1="0" x2="32" y2="32">
+                            <stop stop-color="#00e5ff" />
+                            <stop offset="1" stop-color="#b388ff" />
+                        </linearGradient>
+                    </defs>
+                </svg>
+                <div>
+                    <div>Republic</div>
+                    <div class="logo-sub">Block Explorer</div>
+                </div>
+            </div>
+            <div class="nav-links">
+                <a href="#home" onclick="go('home')" id="nav-home">Home</a>
+                <a href="#validators" onclick="go('validators')" id="nav-validators">Validators</a>
+                <a href="#blocks" onclick="go('blocks')" id="nav-blocks">Blocks</a>
+                <a href="#txs" onclick="go('txs')" id="nav-txs">Transactions</a>
+            </div>
+            <div class="search-box">
+                <svg class="search-icon" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"
+                    viewBox="0 0 24 24">
+                    <circle cx="11" cy="11" r="8" />
+                    <path d="m21 21-4.35-4.35" />
+                </svg>
+                <input type="text" id="globalSearch" placeholder="Search block / tx / addr...">
+            </div>
+        </div>
+    </nav>
+
+    <main>
+
+        <!-- HOME -->
+        <div class="page active" id="page-home">
+            <div class="hero">
+                <div class="hero-logo">
+                    <svg viewBox="0 0 48 48" fill="none">
+                        <rect width="48" height="48" rx="12" fill="url(#lg2)" />
+                        <path d="M14 16h6v16h-6zM28 16h6v16h-6z" fill="#000" />
+                        <path d="M20 22h8v4h-8z" fill="#000" />
+                        <defs>
+                            <linearGradient id="lg2" x1="0" y1="0" x2="48" y2="48">
+                                <stop stop-color="#00e5ff" />
+                                <stop offset="1" stop-color="#b388ff" />
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                    <span class="orbitron">Republic</span>
+                </div>
+                <div class="hero-tagline">
+                    Decentralized. <span class="cyan">Deterministic.</span><br>
+                    <span class="magenta">Designed for Compute.</span>
+                </div>
+                <p class="hero-desc">Republic is a decentralized Layer 1 blockchain protocol built to coordinate and
+                    verify high-performance computational tasks. Tasks are distributed across a validator network,
+                    validated, and permanently recorded on-chain for trustless execution.</p>
+                <div class="hero-stats">
+                    <div class="hero-stat">
+                        <div class="hero-stat-label">FLOPS/SEC</div>
+                        <div class="hero-stat-val cyan orbitron">2.98B</div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="hero-stat-label">LATENCY</div>
+                        <div class="hero-stat-val green orbitron">200<small
+                                style="font-size:.6em;color:var(--t2)">ms</small></div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="hero-stat-label">VALIDATORS</div>
+                        <div class="hero-stat-val purple orbitron" id="heroValCount">—</div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="hero-stat-label">PER JOB UNIT</div>
+                        <div class="hero-stat-val magenta orbitron">$0.003</div>
+                    </div>
+                </div>
+                <div class="hero-btns">
+                    <a class="hero-btn primary" href="https://republic.ai" target="_blank">Visit Website ↗</a>
+                    <a class="hero-btn" href="https://x.com/joinrepublicai" target="_blank">𝕏 Twitter</a>
+                    <a class="hero-btn" href="https://discord.com/invite/republicai" target="_blank">💬 Discord</a>
+                    <a class="hero-btn" href="https://github.com/RepublicAI/networks" target="_blank">📖 Docs</a>
+                    <a class="hero-btn" href="https://github.com/RepublicAI" target="_blank">⚡ GitHub</a>
+                </div>
+            </div>
+            <div class="net-status">
+                <div class="net-header">
+                    <div class="net-dot"></div>
+                    <h2 class="orbitron">Network Status</h2>
+                    <div class="net-badge">Testnet</div>
+                </div>
+                <div class="net-grid">
+                    <div class="net-card">
+                        <div class="net-card-label">Block Height</div>
+                        <div class="net-card-val cyan orbitron" id="netHeight">—</div>
+                    </div>
+                    <div class="net-card">
+                        <div class="net-card-label">Validators</div>
+                        <div class="net-card-val green orbitron" id="netVals">—</div>
+                        <div class="net-card-sub" style="color:var(--green)">Active</div>
+                    </div>
+                    <div class="net-card">
+                        <div class="net-card-label">Bonded Tokens</div>
+                        <div class="net-card-val magenta orbitron" id="netBonded">—</div>
+                        <div class="net-card-sub">RAI</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VALIDATORS -->
+        <div class="page" id="page-validators">
+            <iframe src="validators/index.html"
+                style="width:100%;height:calc(100vh - 80px);border:none;border-radius:12px;"></iframe>
+        </div>
+
+        <!-- BLOCKS -->
+        <div class="page" id="page-blocks">
+            <div class="page-head">
+                <div class="page-head-left">
+                    <h1><span class="dot" style="background:var(--cyan)"></span> BLOCKS</h1>
+                    <p>Browse all blocks on the Republic blockchain</p>
+                </div>
+                <div class="live-badge">
+                    <div class="live-dot"></div> Live
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-head">
+                    <div class="card-title">🧊 Block List</div>
+                    <div class="card-sub" id="blockRange"></div>
+                </div>
+                <div id="blockList">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <div class="loading-text">Loading blocks...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TXS -->
+        <div class="page" id="page-txs">
+            <div class="page-head">
+                <div class="page-head-left">
+                    <h1><span class="dot" style="background:var(--pink)"></span> TRANSACTIONS</h1>
+                    <p>Browse recent transactions on the Republic blockchain</p>
+                </div>
+                <button class="refresh-btn" onclick="loadTxs()">🔄 Refresh</button>
+            </div>
+            <div class="card">
+                <div class="card-head">
+                    <div class="card-title">⚡ Recent Transactions</div>
+                    <div class="card-sub" id="txCount">0 transactions</div>
+                </div>
+                <div id="txList">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <div class="loading-text">Loading transactions...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <footer>
+        <div class="f-links">
+            <a href="https://github.com/RepublicAI/networks" target="_blank">Networks</a>
+            <a href="https://rest.republicai.io/swagger/" target="_blank">REST API</a>
+            <a href="https://discord.com/invite/republicai" target="_blank">Discord</a>
+            <a href="https://github.com/eddgia/republicai-validator-guide" target="_blank">Guide</a>
+        </div>
+        <div class="f-credit">Built by <a href="https://github.com/eddgia" target="_blank"
+                style="color:var(--cyan)">eddgia</a> · Powered by RepublicAI</div>
+    </footer>
+
+    <script>
+        const RPC = 'https://rpc.republicai.io';
+        const REST = 'https://rest.republicai.io';
+
+        // ROUTING
+        function go(page) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+            document.getElementById('page-' + page).classList.add('active');
+            const nav = document.getElementById('nav-' + page);
+            if (nav) nav.classList.add('active');
+            window.location.hash = page;
+            if (page === 'blocks') loadBlocks();
+            if (page === 'txs') loadTxs();
+        }
+
+        function route() {
+            const h = window.location.hash.replace('#', '');
+            go(h || 'home');
+        }
+        window.addEventListener('hashchange', route);
+
+        // FORMAT
+        function truncHash(h) { return h ? h.slice(0, 8) + '...' + h.slice(-6) : ''; }
+        function timeAgo(t) {
+            const d = Math.floor((Date.now() - new Date(t).getTime()) / 1000);
+            if (d < 60) return d + 's ago'; if (d < 3600) return Math.floor(d / 60) + 'm ago';
+            if (d < 86400) return Math.floor(d / 3600) + 'h ago'; return Math.floor(d / 86400) + 'd ago';
+        }
+        function formatNum(n) { return n.toLocaleString(); }
+        function tokensToRAI(t) { return Number(BigInt(t) / BigInt(10 ** 18)); }
+        function formatRAI(a) {
+            if (a >= 1e9) return (a / 1e9).toFixed(2) + 'B';
+            if (a >= 1e6) return (a / 1e6).toFixed(1) + 'M';
+            if (a >= 1e3) return (a / 1e3).toFixed(1) + 'K';
+            return a.toLocaleString();
+        }
+
+        // LOAD NETWORK STATUS 
+        async function loadNetStatus() {
+            try {
+                const [statusRes, valsRes] = await Promise.all([
+                    fetch(RPC + '/status').then(r => r.json()),
+                    fetch(REST + '/cosmos/staking/v1beta1/validators?status=BOND_STATUS_BONDED&pagination.limit=1&pagination.count_total=true').then(r => r.json())
+                ]);
+                const height = statusRes.result.sync_info.latest_block_height;
+                document.getElementById('netHeight').textContent = formatNum(parseInt(height));
+
+                // count bonded validators
+                const bondedRes = await fetch(REST + '/cosmos/staking/v1beta1/validators?status=BOND_STATUS_BONDED&pagination.limit=200');
+                const bondedData = await bondedRes.json();
+                const bonded = bondedData.validators || [];
+                const totalBonded = bonded.reduce((s, v) => s + tokensToRAI(v.tokens), 0);
+
+                document.getElementById('netVals').textContent = bonded.length;
+                document.getElementById('heroValCount').textContent = bonded.length + '+';
+                document.getElementById('netBonded').textContent = formatRAI(totalBonded);
+            } catch (e) { console.error('Net status error:', e) }
+        }
+
+        // LOAD BLOCKS
+        let validatorMap = {};
+        async function buildValMap() {
+            if (Object.keys(validatorMap).length > 0) return;
+            try {
+                const r = await fetch(REST + '/cosmos/staking/v1beta1/validators?status=BOND_STATUS_BONDED&pagination.limit=200');
+                const d = await r.json();
+                // We need consensus address -> moniker mapping, but REST doesn't provide it easily
+                // For now use operator_address -> moniker
+                (d.validators || []).forEach(v => {
+                    validatorMap[v.operator_address] = v.description?.moniker || 'Unknown';
+                });
+            } catch (e) { }
+        }
+
+        async function loadBlocks() {
+            const container = document.getElementById('blockList');
+            container.innerHTML = '<div class="loading"><div class="spinner"></div><div class="loading-text">Loading blocks...</div></div>';
+
+            try {
+                await buildValMap();
+                // Fetch latest block first
+                const latestRes = await fetch(RPC + '/block');
+                const latestData = await latestRes.json();
+                const latestHeight = parseInt(latestData.result.block.header.height);
+
+                // Fetch last 20 blocks
+                const blocks = [];
+                const promises = [];
+                for (let h = latestHeight; h > latestHeight - 20 && h > 0; h--) {
+                    promises.push(
+                        fetch(RPC + '/block?height=' + h).then(r => r.json()).then(d => ({
+                            height: d.result.block.header.height,
+                            hash: d.result.block_id.hash,
+                            time: d.result.block.header.time,
+                            txCount: d.result.block.data.txs ? d.result.block.data.txs.length : 0,
+                            proposer: d.result.block.header.proposer_address
+                        })).catch(() => null)
+                    );
+                }
+                const results = (await Promise.all(promises)).filter(Boolean);
+                results.sort((a, b) => parseInt(b.height) - parseInt(a.height));
+
+                const minH = results[results.length - 1]?.height || '';
+                const maxH = results[0]?.height || '';
+                document.getElementById('blockRange').textContent = minH + ' - ' + maxH;
+
+                let html = '';
+                results.forEach(b => {
+                    const txLabel = b.txCount === 0 ? '' : b.txCount === 1 ? `<span class="tx-badge">1 tx</span>` : `<span class="tx-badge multi">${b.txCount} txs</span>`;
+                    html += `<div class="row-item">
+        <div class="row-left">
+          <div class="row-icon block"><svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M21 16.5c0 .38-.21.71-.53.88l-7.9 4.44c-.36.2-.8.2-1.14 0l-7.9-4.44A.99.99 0 0 1 3 16.5v-9c0-.38.21-.71.53-.88l7.9-4.44c.36-.2.8-.2 1.14 0l7.9 4.44c.32.17.53.5.53.88v9z"/></svg></div>
+          <div class="row-main">
+            <div class="row-title">#${formatNum(parseInt(b.height))} ${txLabel}</div>
+            <div class="row-sub">${truncHash(b.hash)}</div>
+          </div>
+        </div>
+        <div class="row-right">
+          <div class="row-time">${timeAgo(b.time)}</div>
+        </div>
+      </div>`;
+                });
+                container.innerHTML = html;
+            } catch (e) {
+                container.innerHTML = `<div class="loading"><div class="loading-text" style="color:var(--pink)">Error: ${e.message}</div></div>`;
+            }
+        }
+
+        // LOAD TRANSACTIONS
+        async function loadTxs() {
+            const container = document.getElementById('txList');
+            container.innerHTML = '<div class="loading"><div class="spinner"></div><div class="loading-text">Loading transactions...</div></div>';
+
+            try {
+                // Fetch latest block to get recent txs
+                const latestRes = await fetch(RPC + '/block');
+                const latestH = parseInt((await latestRes.json()).result.block.header.height);
+
+                let allTxs = [];
+                // Search recent blocks for transactions
+                for (let h = latestH; h > latestH - 50 && h > 0; h--) {
+                    try {
+                        const r = await fetch(REST + '/cosmos/tx/v1beta1/txs?events=tx.height=' + h + '&pagination.limit=10');
+                        const d = await r.json();
+                        if (d.tx_responses && d.tx_responses.length > 0) {
+                            allTxs = allTxs.concat(d.tx_responses);
+                        }
+                        if (allTxs.length >= 20) break;
+                    } catch (e) { }
+                }
+
+                document.getElementById('txCount').textContent = allTxs.length + ' transactions';
+
+                if (allTxs.length === 0) {
+                    container.innerHTML = '<div class="loading"><div class="loading-text">No recent transactions found</div></div>';
+                    return;
+                }
+
+                let html = '<div style="display:grid;grid-template-columns:1.2fr 1.5fr .6fr .5fr;padding:12px 1.5rem;font-size:.72rem;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;font-weight:600;border-bottom:1px solid var(--border)"><div>TX Hash</div><div>Type</div><div>Status</div><div style="text-align:right">Block</div></div>';
+
+                allTxs.slice(0, 20).forEach(tx => {
+                    const hash = tx.txhash || '';
+                    const msgs = tx.tx?.body?.messages || [];
+                    const msgType = msgs[0]?.['@type']?.split('.').pop() || 'Unknown';
+                    const code = tx.code || 0;
+                    const height = tx.height || '';
+                    const statusClass = code === 0 ? 'success' : 'fail';
+                    const statusText = code === 0 ? '✓ Success' : '✗ Failed';
+
+                    html += `<div class="tx-row">
+        <div class="tx-hash">${truncHash(hash)}</div>
+        <div class="tx-type"><span>${msgType}</span></div>
+        <div class="tx-status ${statusClass}">${statusText}</div>
+        <div class="tx-block">#${formatNum(parseInt(height))}</div>
+      </div>`;
+                });
+                container.innerHTML = html;
+            } catch (e) {
+                container.innerHTML = `<div class="loading"><div class="loading-text" style="color:var(--pink)">Error: ${e.message}</div></div>`;
+            }
+        }
+
+        // SEARCH
+        document.getElementById('globalSearch').addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                const q = this.value.trim();
+                if (!q) return;
+                if (/^\d+$/.test(q)) { go('blocks'); }
+                else if (q.startsWith('raivaloper')) { go('validators'); }
+                else { go('txs'); }
+            }
+        });
+
+        // INIT
+        loadNetStatus();
+        route();
+        setInterval(loadNetStatus, 15000);
+    </script>
+</body>
+
+</html>
