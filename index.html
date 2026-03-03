@@ -1358,6 +1358,16 @@
             </div>
         </div>
 
+        <!-- BLOCK DETAIL -->
+        <div class="page" id="page-blockdetail">
+            <div id="blockDetailContent">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <div class="loading-text">Loading block...</div>
+                </div>
+            </div>
+        </div>
+
     </main>
 
     <footer>
@@ -1387,6 +1397,14 @@
                 loadValidatorDetail(page.replace('validator/', ''));
                 return;
             }
+            if (page.startsWith('block/')) {
+                document.getElementById('page-blockdetail').classList.add('active');
+                const nav = document.getElementById('nav-blocks');
+                if (nav) nav.classList.add('active');
+                window.location.hash = page;
+                loadBlockDetail(page.replace('block/', ''));
+                return;
+            }
             document.getElementById('page-' + page).classList.add('active');
             const nav = document.getElementById('nav-' + page);
             if (nav) nav.classList.add('active');
@@ -1399,6 +1417,7 @@
         function route() {
             const h = window.location.hash.replace('#', '');
             if (h.startsWith('validator/')) { go(h); return; }
+            if (h.startsWith('block/')) { go(h); return; }
             go(h || 'home');
         }
         window.addEventListener('hashchange', route);
@@ -1512,7 +1531,7 @@
                 let html = '';
                 results.forEach(b => {
                     const txLabel = b.txCount === 0 ? '' : b.txCount === 1 ? `<span class="tx-badge">1 tx</span>` : `<span class="tx-badge multi">${b.txCount} txs</span>`;
-                    html += `<div class="row-item">
+                    html += `<div class="row-item" style="cursor:pointer" onclick="go('block/${b.height}')">
         <div class="row-left">
           <div class="row-icon block"><svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M21 16.5c0 .38-.21.71-.53.88l-7.9 4.44c-.36.2-.8.2-1.14 0l-7.9-4.44A.99.99 0 0 1 3 16.5v-9c0-.38.21-.71.53-.88l7.9-4.44c.36-.2.8-.2 1.14 0l7.9 4.44c.32.17.53.5.53.88v9z"/></svg></div>
           <div class="row-main">
@@ -1617,6 +1636,130 @@
                 container.innerHTML = html;
             } catch (e) {
                 container.innerHTML = `<div class="loading"><div class="loading-text" style="color:var(--pink)">Error: ${e.message}</div></div>`;
+            }
+        }
+
+        // BLOCK DETAIL
+        async function loadBlockDetail(height) {
+            const container = document.getElementById('blockDetailContent');
+            container.innerHTML = '<div class="loading"><div class="spinner"></div><div class="loading-text">Loading block...</div></div>';
+            try {
+                const h = parseInt(height);
+                const blockRes = await fetch(REST + '/cosmos/base/tendermint/v1beta1/blocks/' + h).then(r => r.json());
+                const block = blockRes.block;
+                if (!block) { container.innerHTML = '<div class="loading"><div class="loading-text" style="color:var(--pink)">Block not found</div></div>'; return; }
+
+                const header = block.header;
+                const blockHash = blockRes.block_id?.hash || '';
+                const timestamp = new Date(header.time).toLocaleString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                const chainId = header.chain_id || '';
+                const proposerAddr = header.proposer_address || '';
+                const appHash = header.app_hash || '';
+                const dataHash = header.data_hash || '';
+                const validatorsHash = header.validators_hash || '';
+                const consensusHash = header.consensus_hash || '';
+                const txs = block.data?.txs || [];
+
+                // Try to get proposer moniker from validators
+                let proposerMoniker = '';
+                try {
+                    await buildValMap();
+                    // proposerAddr is base64 encoded consensus address; try to match
+                    // For now just show the address, will attempt to resolve
+                    const bondedRes = await fetch(REST + '/cosmos/staking/v1beta1/validators?status=BOND_STATUS_BONDED&pagination.limit=200').then(r => r.json());
+                    const validators = bondedRes.validators || [];
+                    for (const v of validators) {
+                        try {
+                            const pubkeyBase64 = v.consensus_pubkey?.key || '';
+                            if (pubkeyBase64) {
+                                const raw = Uint8Array.from(atob(pubkeyBase64), c => c.charCodeAt(0));
+                                const hashBuf = await crypto.subtle.digest('SHA-256', raw);
+                                const hashArr = new Uint8Array(hashBuf);
+                                const consHex = Array.from(hashArr.slice(0, 20)).map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+                                // proposerAddr is base64, convert to hex
+                                const propBytes = Uint8Array.from(atob(proposerAddr), c => c.charCodeAt(0));
+                                const propHex = Array.from(propBytes).map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+                                if (consHex === propHex) {
+                                    proposerMoniker = v.description?.moniker || '';
+                                    break;
+                                }
+                            }
+                        } catch (e) { }
+                    }
+                } catch (e) { }
+
+                // Fetch txs in this block
+                let blockTxs = [];
+                if (txs.length > 0) {
+                    try {
+                        const txRes = await fetch(REST + '/cosmos/tx/v1beta1/txs/block/' + h).then(r => r.json());
+                        const rawTxs = txRes.txs || [];
+                        const txResponses = txRes.tx_responses || [];
+                        for (let i = 0; i < rawTxs.length; i++) {
+                            const msgs = rawTxs[i].body?.messages || [];
+                            const msgType = msgs[0]?.['@type']?.split('.').pop() || 'Unknown';
+                            const txHash = txResponses[i]?.txhash || '';
+                            const code = txResponses[i]?.code || 0;
+                            blockTxs.push({ hash: txHash, type: msgType, code });
+                        }
+                    } catch (e) { }
+                }
+
+                let txsHtml = '';
+                if (blockTxs.length > 0) {
+                    txsHtml = `<div class="vd-section" style="margin-top:1.5rem">
+                        <div class="vd-section-head">⚡ Transactions in Block (${blockTxs.length})</div>
+                        <div class="vd-section-body">`;
+                    blockTxs.forEach(tx => {
+                        const status = tx.code === 0 ? '<span style="color:var(--green)">✓ Success</span>' : '<span style="color:var(--pink)">✗ Failed</span>';
+                        txsHtml += `<div class="vd-row">
+                            <div><span style="font-family:'JetBrains Mono';font-size:.82rem;color:var(--cyan)">${tx.hash ? truncHash(tx.hash) : '—'}</span></div>
+                            <div style="display:flex;gap:12px;align-items:center">
+                                <span class="tx-type"><span>${tx.type}</span></span>
+                                ${status}
+                            </div>
+                        </div>`;
+                    });
+                    txsHtml += '</div></div>';
+                } else {
+                    txsHtml = `<div class="vd-section" style="margin-top:1.5rem">
+                        <div class="vd-section-head">⚡ Transactions</div>
+                        <div class="vd-section-body"><div style="color:var(--t3);text-align:center;padding:1rem">No transactions in this block</div></div>
+                    </div>`;
+                }
+
+                container.innerHTML = `
+                <div class="page-head">
+                    <div class="page-head-left">
+                        <h1><span class="dot" style="background:var(--cyan)"></span> BLOCK #${formatNum(h)}</h1>
+                    </div>
+                    <div style="display:flex;gap:8px">
+                        <button class="refresh-btn" onclick="go('block/${h - 1}')" ${h <= 1 ? 'disabled' : ''}>‹ Previous</button>
+                        <button class="refresh-btn" onclick="go('block/${h + 1}')">Next ›</button>
+                    </div>
+                </div>
+
+                <div class="vd-section">
+                    <div class="vd-section-head">🧊 Block Details</div>
+                    <div class="vd-section-body">
+                        <div class="vd-row"><div class="vd-label">Height</div><div class="vd-value" style="color:var(--cyan);font-weight:700">${formatNum(h)}</div></div>
+                        <div class="vd-row"><div class="vd-label">Timestamp</div><div class="vd-value">${timestamp}</div></div>
+                        <div class="vd-row"><div class="vd-label">Block Hash</div><div class="vd-value" style="font-size:.75rem">${blockHash}</div></div>
+                        <div class="vd-row"><div class="vd-label">Chain ID</div><div class="vd-value">${chainId}</div></div>
+                        <div class="vd-row"><div class="vd-label">Proposer</div><div class="vd-value" style="color:var(--green)">${proposerMoniker || truncHash(proposerAddr)}</div></div>
+                        <div class="vd-row"><div class="vd-label">Transactions</div><div class="vd-value">${txs.length}</div></div>
+                        <div class="vd-row"><div class="vd-label">App Hash</div><div class="vd-value" style="font-size:.75rem">${appHash || '—'}</div></div>
+                        <div class="vd-row"><div class="vd-label">Data Hash</div><div class="vd-value" style="font-size:.75rem">${dataHash || '—'}</div></div>
+                        <div class="vd-row"><div class="vd-label">Validators Hash</div><div class="vd-value" style="font-size:.75rem">${validatorsHash || '—'}</div></div>
+                    </div>
+                </div>
+
+                ${txsHtml}
+
+                <div class="vd-back" onclick="go('blocks')">← Back to blocks</div>
+                `;
+            } catch (e) {
+                container.innerHTML = '<div class="loading"><div class="loading-text" style="color:var(--pink)">Error: ' + e.message + '</div></div>';
             }
         }
 
@@ -1822,7 +1965,7 @@
                     const txCount = b.block?.data?.txs?.length || 0;
                     const time = b.block?.header?.time || '';
                     const proposer = b.block?.header?.proposer_address || '';
-                    bHtml += `<div class="block-row" style="cursor:pointer" onclick="go('blocks')">
+                    bHtml += `<div class="block-row" style="cursor:pointer" onclick="go('block/${h}')">
                         <div class="block-icon">🧊</div>
                         <div class="block-info-col">
                             <div class="block-height">#${formatNum(parseInt(h))}${txCount > 0 ? ' <span class="block-tx-badge">' + txCount + ' tx</span>' : ''}</div>
