@@ -22,6 +22,7 @@
 12. [Health Check Script](#12-health-check-script)
 13. [Troubleshooting](#13-troubleshooting)
 14. [Architecture](#14-architecture)
+15. [Docker Deployment (Cloud VPS)](#15-docker-deployment-cloud-vps)
 
 ---
 
@@ -855,6 +856,232 @@ Phase 2: Execution        → Auto-compute runs Docker inference → Produces re
 Phase 3: Result Submit    → Hash + upload → MsgSubmitJobResult → Status: PendingValidation
 Phase 4: Verification     → Committee downloads & verifies result → Votes true/false
 Phase 5: Settlement       → Majority true → Fee to miner | Majority false → Fee refunded
+```
+
+---
+
+## 15. Docker Deployment (Cloud VPS)
+
+> **For users running on cloud VPS without direct system access.** This section covers running the entire stack in Docker containers.
+
+### 15.1 Prerequisites
+
+```bash
+# Install Docker
+curl -fsSL https://get.docker.com | sh
+sudo usermod -aG docker $USER
+newgrp docker
+
+# Install Docker Compose
+sudo apt-get install -y docker-compose-plugin
+
+# Verify
+docker --version
+docker compose version
+```
+
+### 15.2 Create project structure
+
+```bash
+mkdir -p ~/republic-docker/{config,data,jobs}
+cd ~/republic-docker
+```
+
+### 15.3 docker-compose.yml
+
+```bash
+cat > ~/republic-docker/docker-compose.yml << 'EOF'
+version: "3.8"
+
+services:
+  # ===== 1. Republic Node =====
+  republicd:
+    image: ubuntu:22.04
+    container_name: republic-node
+    restart: always
+    ports:
+      - "26656:26656"  # P2P
+      - "26657:26657"  # RPC
+      - "1317:1317"    # REST API
+      - "9090:9090"    # gRPC
+    volumes:
+      - ./data:/root/.republicd
+      - ./republicd:/usr/local/bin/republicd
+    command: >
+      /usr/local/bin/republicd start
+        --home /root/.republicd
+        --chain-id raitestnet_77701-1
+    networks:
+      - republic
+
+  # ===== 2. HTTP File Server =====
+  http-server:
+    image: python:3.11-slim
+    container_name: republic-http
+    restart: always
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./jobs:/jobs
+    working_dir: /jobs
+    command: python3 -m http.server 8080
+    networks:
+      - republic
+
+  # ===== 3. Auto-Compute =====
+  auto-compute:
+    image: ubuntu:22.04
+    container_name: republic-compute
+    restart: always
+    depends_on:
+      - republicd
+    volumes:
+      - ./data:/root/.republicd
+      - ./jobs:/var/lib/republic/jobs
+      - ./republicd:/usr/local/bin/republicd
+      - ./auto-compute.sh:/app/auto-compute.sh
+      - ./inference.py:/app/inference.py
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: bash /app/auto-compute.sh
+    environment:
+      - NODE=tcp://republicd:26657
+    networks:
+      - republic
+
+networks:
+  republic:
+    driver: bridge
+EOF
+```
+
+### 15.4 Download republicd binary
+
+```bash
+cd ~/republic-docker
+
+VERSION=$(curl -s https://api.github.com/repos/RepublicAI/networks/releases/latest | jq -r .tag_name)
+ARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/')
+
+curl -L "https://github.com/RepublicAI/networks/releases/download/${VERSION}/republicd-linux-${ARCH}" \
+  -o republicd
+chmod +x republicd
+```
+
+### 15.5 Initialize & configure
+
+```bash
+cd ~/republic-docker
+
+# Initialize
+./republicd init my-node \
+  --chain-id raitestnet_77701-1 \
+  --home ./data
+
+# Download genesis
+curl -s https://raw.githubusercontent.com/RepublicAI/networks/main/testnet/genesis.json \
+  > ./data/config/genesis.json
+
+# Configure peers
+PEERS="cd10f1a4162e3a4fadd6993a24fd5a32b27b8974@52.201.231.127:26656,f13fec7efb7538f517c74435e082c7ee54b4a0ff@3.208.19.30:26656"
+sed -i "s/^persistent_peers *=.*/persistent_peers = \"$PEERS\"/" \
+  ./data/config/config.toml
+
+# Enable REST API
+sed -i '/^\[api\]/,/^\[/ s/^enable = false/enable = true/' \
+  ./data/config/app.toml
+
+# Create wallet
+./republicd keys add my-wallet \
+  --home ./data \
+  --keyring-backend test
+
+# ⚠️ SAVE YOUR MNEMONIC!
+```
+
+### 15.6 Start everything
+
+```bash
+cd ~/republic-docker
+
+# Start node first, wait for sync
+docker compose up -d republicd
+docker compose logs -f republicd  # Wait until catching_up=false
+
+# Then start all services
+docker compose up -d
+```
+
+### 15.7 Create validator (after sync + funded)
+
+```bash
+cd ~/republic-docker
+
+./republicd tx staking create-validator \
+  --amount=1000000000000000000000arai \
+  --pubkey=$(./republicd comet show-validator --home ./data) \
+  --moniker="your-moniker" \
+  --chain-id=raitestnet_77701-1 \
+  --commission-rate="0.10" \
+  --commission-max-rate="0.20" \
+  --commission-max-change-rate="0.01" \
+  --min-self-delegation="1" \
+  --gas=auto --gas-adjustment=1.5 \
+  --gas-prices="250000000arai" \
+  --from=my-wallet \
+  --home ./data \
+  --keyring-backend test \
+  --node tcp://localhost:26657 -y
+```
+
+### 15.8 GPU support (optional)
+
+If your VPS has NVIDIA GPU:
+
+```bash
+# Install NVIDIA Container Toolkit
+distribution=$(. /etc/os-release; echo $ID$VERSION_ID)
+curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey \
+  | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg
+curl -s -L "https://nvidia.github.io/libnvidia-container/$distribution/libnvidia-container.list" \
+  | sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' \
+  | sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
+sudo apt-get update && sudo apt-get install -y nvidia-container-toolkit
+sudo nvidia-ctk runtime configure --runtime=docker
+sudo systemctl restart docker
+
+# Verify
+docker run --rm --gpus all nvidia/cuda:11.8.0-base-ubuntu22.04 nvidia-smi
+```
+
+### 15.9 Managing
+
+```bash
+cd ~/republic-docker
+
+# View logs
+docker compose logs -f republicd        # Node logs
+docker compose logs -f auto-compute     # Compute logs
+docker compose logs -f http-server      # HTTP server
+
+# Restart
+docker compose restart republicd
+docker compose restart auto-compute
+
+# Stop all
+docker compose down
+
+# Start all
+docker compose up -d
+```
+
+### 15.10 Firewall
+
+```bash
+# Required ports
+sudo ufw allow 26656/tcp   # P2P
+sudo ufw allow 8080/tcp    # HTTP result server
+# Optional
+sudo ufw allow 26657/tcp   # RPC (if external access needed)
 ```
 
 ---
