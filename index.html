@@ -1108,15 +1108,40 @@
                 }
 
                 let allTxs = [];
-                // Batch fetch txs from recent blocks
+                // Batch fetch txs from recent blocks using /txs/block/{height}
                 const batchSize = 10;
                 for (let start = latestBlockHeight; start > latestBlockHeight - 100 && start > 0 && allTxs.length < 20; start -= batchSize) {
                     const batchPromises = [];
                     for (let h = start; h > start - batchSize && h > 0; h--) {
                         batchPromises.push(
-                            fetch(REST + '/cosmos/tx/v1beta1/txs?events=tx.height=' + h + '&pagination.limit=10')
+                            fetch(REST + '/cosmos/tx/v1beta1/txs/block/' + h)
                                 .then(r => r.json())
-                                .then(d => d.tx_responses || [])
+                                .then(async d => {
+                                    const txs = d.txs || [];
+                                    const rawTxs = d.block?.data?.txs || [];
+                                    const blockH = d.block?.header?.height || h.toString();
+                                    const blockTime = d.block?.header?.time || '';
+                                    const results = [];
+                                    for (let i = 0; i < txs.length; i++) {
+                                        // Compute txhash from raw tx bytes
+                                        let txhash = '';
+                                        if (rawTxs[i]) {
+                                            try {
+                                                const raw = Uint8Array.from(atob(rawTxs[i]), c => c.charCodeAt(0));
+                                                const hashBuf = await crypto.subtle.digest('SHA-256', raw);
+                                                txhash = Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+                                            } catch (e) { }
+                                        }
+                                        results.push({
+                                            tx: txs[i],
+                                            txhash: txhash,
+                                            height: blockH,
+                                            time: blockTime,
+                                            code: 0,
+                                        });
+                                    }
+                                    return results;
+                                })
                                 .catch(() => [])
                         );
                     }
@@ -1144,12 +1169,13 @@
                     const height = tx.height || '';
                     const statusClass = code === 0 ? 'success' : 'fail';
                     const statusText = code === 0 ? '✓ Success' : '✗ Failed';
+                    const timeStr = tx.time ? timeAgo(tx.time) : '';
 
                     html += `<div class="tx-row">
-        <div class="tx-hash">${truncHash(hash)}</div>
+        <div class="tx-hash">${hash ? truncHash(hash) : '—'}</div>
         <div class="tx-type"><span>${msgType}</span></div>
         <div class="tx-status ${statusClass}">${statusText}</div>
-        <div class="tx-block">#${formatNum(parseInt(height))}</div>
+        <div class="tx-block">#${formatNum(parseInt(height))}${timeStr ? '<br><span style="font-size:.7rem;color:var(--t3)">' + timeStr + '</span>' : ''}</div>
       </div>`;
                 });
                 container.innerHTML = html;
