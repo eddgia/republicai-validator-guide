@@ -1368,6 +1368,16 @@
             </div>
         </div>
 
+        <!-- TX DETAIL -->
+        <div class="page" id="page-txdetail">
+            <div id="txDetailContent">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <div class="loading-text">Loading transaction...</div>
+                </div>
+            </div>
+        </div>
+
     </main>
 
     <footer>
@@ -1405,6 +1415,14 @@
                 loadBlockDetail(page.replace('block/', ''));
                 return;
             }
+            if (page.startsWith('tx/')) {
+                document.getElementById('page-txdetail').classList.add('active');
+                const nav = document.getElementById('nav-txs');
+                if (nav) nav.classList.add('active');
+                window.location.hash = page;
+                loadTxDetail(page.replace('tx/', ''));
+                return;
+            }
             document.getElementById('page-' + page).classList.add('active');
             const nav = document.getElementById('nav-' + page);
             if (nav) nav.classList.add('active');
@@ -1418,6 +1436,7 @@
             const h = window.location.hash.replace('#', '');
             if (h.startsWith('validator/')) { go(h); return; }
             if (h.startsWith('block/')) { go(h); return; }
+            if (h.startsWith('tx/')) { go(h); return; }
             go(h || 'home');
         }
         window.addEventListener('hashchange', route);
@@ -1626,7 +1645,7 @@
                     const statusText = code === 0 ? '✓ Success' : '✗ Failed';
                     const timeStr = tx.time ? timeAgo(tx.time) : '';
 
-                    html += `<div class="tx-row">
+                    html += `<div class="tx-row" style="cursor:pointer" onclick="go('tx/${hash}')">
         <div class="tx-hash">${hash ? truncHash(hash) : '—'}</div>
         <div class="tx-type"><span>${msgType}</span></div>
         <div class="tx-status ${statusClass}">${statusText}</div>
@@ -1636,6 +1655,101 @@
                 container.innerHTML = html;
             } catch (e) {
                 container.innerHTML = `<div class="loading"><div class="loading-text" style="color:var(--pink)">Error: ${e.message}</div></div>`;
+            }
+        }
+
+        // TX DETAIL
+        async function loadTxDetail(txHash) {
+            const container = document.getElementById('txDetailContent');
+            container.innerHTML = '<div class="loading"><div class="spinner"></div><div class="loading-text">Loading transaction...</div></div>';
+            try {
+                // Fetch tx by hash
+                const res = await fetch(REST + '/cosmos/tx/v1beta1/txs/' + txHash).then(r => r.json());
+                const tx = res.tx;
+                const txResponse = res.tx_response;
+                if (!tx || !txResponse) { container.innerHTML = '<div class="loading"><div class="loading-text" style="color:var(--pink)">Transaction not found</div></div>'; return; }
+
+                const hash = txResponse.txhash || txHash;
+                const height = txResponse.height || '';
+                const code = txResponse.code || 0;
+                const gasWanted = txResponse.gas_wanted || '0';
+                const gasUsed = txResponse.gas_used || '0';
+                const timestamp = txResponse.timestamp ? new Date(txResponse.timestamp).toLocaleString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '';
+                const rawLog = txResponse.raw_log || '';
+                const logs = txResponse.logs || [];
+                const fee = tx.auth_info?.fee?.amount || [];
+                const feeStr = fee.length > 0 ? (tokensToRAI(fee[0].amount) + ' RAI') : '0 RAI';
+                const memo = tx.body?.memo || '';
+
+                // Messages
+                const msgs = tx.body?.messages || [];
+                let msgsHtml = '';
+                msgs.forEach((msg, idx) => {
+                    const type = msg['@type']?.split('.').pop() || 'Unknown';
+                    msgsHtml += `<div class="vd-section" style="margin-top:1rem">
+                        <div class="vd-section-head">📋 Message #${idx + 1} — ${type}</div>
+                        <div class="vd-section-body">`;
+                    Object.entries(msg).forEach(([key, val]) => {
+                        if (key === '@type') return;
+                        let display = val;
+                        if (typeof val === 'object') display = JSON.stringify(val, null, 2);
+                        const isAddr = typeof val === 'string' && (val.startsWith('rai1') || val.startsWith('raivaloper'));
+                        msgsHtml += `<div class="vd-row"><div class="vd-label">${key}</div><div class="vd-value" style="${isAddr ? 'color:var(--cyan);' : ''}font-size:.78rem;word-break:break-all">${display}</div></div>`;
+                    });
+                    msgsHtml += '</div></div>';
+                });
+
+                // Events / Logs
+                let logsHtml = '';
+                if (logs.length > 0) {
+                    logsHtml = '<div class="vd-section" style="margin-top:1.5rem"><div class="vd-section-head">📃 Event Logs</div><div class="vd-section-body">';
+                    logs.forEach((log, logIdx) => {
+                        const events = log.events || [];
+                        events.forEach(evt => {
+                            logsHtml += `<div style="margin-bottom:1rem"><div style="color:var(--magenta);font-weight:600;font-size:.82rem;margin-bottom:6px">📌 ${evt.type}</div>`;
+                            (evt.attributes || []).forEach(attr => {
+                                logsHtml += `<div class="vd-row" style="padding:4px 0"><div class="vd-label" style="font-size:.75rem">${attr.key}</div><div class="vd-value" style="font-size:.75rem;word-break:break-all">${attr.value || '—'}</div></div>`;
+                            });
+                            logsHtml += '</div>';
+                        });
+                    });
+                    logsHtml += '</div></div>';
+                } else if (rawLog) {
+                    logsHtml = `<div class="vd-section" style="margin-top:1.5rem"><div class="vd-section-head">📃 Raw Log</div><div class="vd-section-body"><pre style="font-family:'JetBrains Mono';font-size:.72rem;color:var(--t2);white-space:pre-wrap;word-break:break-all;margin:0;padding:.5rem">${rawLog}</pre></div></div>`;
+                }
+
+                const statusBadge = code === 0
+                    ? '<span style="background:rgba(0,255,100,.15);color:var(--green);padding:4px 12px;border-radius:6px;font-weight:700;font-size:.82rem">✓ Success</span>'
+                    : '<span style="background:rgba(255,0,80,.15);color:var(--pink);padding:4px 12px;border-radius:6px;font-weight:700;font-size:.82rem">✗ Failed (code: ' + code + ')</span>';
+
+                container.innerHTML = `
+                <div class="page-head">
+                    <div class="page-head-left">
+                        <h1><span class="dot" style="background:var(--magenta)"></span> TRANSACTION</h1>
+                    </div>
+                    ${statusBadge}
+                </div>
+
+                <div class="vd-section">
+                    <div class="vd-section-head">⚡ Transaction Details</div>
+                    <div class="vd-section-body">
+                        <div class="vd-row"><div class="vd-label">TX Hash</div><div class="vd-value" style="font-size:.72rem;color:var(--cyan);word-break:break-all">${hash}</div></div>
+                        <div class="vd-row"><div class="vd-label">Status</div><div class="vd-value">${code === 0 ? '<span style="color:var(--green)">✓ Success</span>' : '<span style="color:var(--pink)">✗ Failed</span>'}</div></div>
+                        <div class="vd-row"><div class="vd-label">Block</div><div class="vd-value"><a href="#block/${height}" onclick="go('block/${height}')" style="color:var(--cyan);text-decoration:underline">#${formatNum(parseInt(height))}</a></div></div>
+                        <div class="vd-row"><div class="vd-label">Timestamp</div><div class="vd-value">${timestamp}</div></div>
+                        <div class="vd-row"><div class="vd-label">Gas Used / Wanted</div><div class="vd-value">${formatNum(parseInt(gasUsed))} / ${formatNum(parseInt(gasWanted))}</div></div>
+                        <div class="vd-row"><div class="vd-label">Fee</div><div class="vd-value" style="color:var(--yellow)">${feeStr}</div></div>
+                        ${memo ? '<div class="vd-row"><div class="vd-label">Memo</div><div class="vd-value">' + memo + '</div></div>' : ''}
+                    </div>
+                </div>
+
+                ${msgsHtml}
+                ${logsHtml}
+
+                <div class="vd-back" onclick="go('txs')">← Back to transactions</div>
+                `;
+            } catch (e) {
+                container.innerHTML = '<div class="loading"><div class="loading-text" style="color:var(--pink)">Error: ' + e.message + '</div></div>';
             }
         }
 
