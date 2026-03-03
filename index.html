@@ -1187,20 +1187,108 @@
                     <h2 class="orbitron">Network Status</h2>
                     <div class="net-badge">Testnet</div>
                 </div>
-                <div class="net-grid">
-                    <div class="net-card">
-                        <div class="net-card-label">Block Height</div>
-                        <div class="net-card-val cyan orbitron" id="netHeight">—</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem">
+                    <div>
+                        <div class="net-grid">
+                            <div class="net-card">
+                                <div class="net-card-label">Block Height</div>
+                                <div class="net-card-val cyan orbitron" id="netHeight">—</div>
+                            </div>
+                            <div class="net-card">
+                                <div class="net-card-label">Validators</div>
+                                <div class="net-card-val green orbitron" id="netVals">—</div>
+                                <div class="net-card-sub" style="color:var(--green)">Active</div>
+                            </div>
+                            <div class="net-card">
+                                <div class="net-card-label">Bonded Tokens</div>
+                                <div class="net-card-val magenta orbitron" id="netBonded">—</div>
+                                <div class="net-card-sub">RAI</div>
+                            </div>
+                        </div>
+                        <div class="net-grid" style="margin-top:1rem">
+                            <div class="net-card">
+                                <div class="net-card-label">Total Supply</div>
+                                <div class="net-card-val purple orbitron" id="netSupply">—</div>
+                                <div class="net-card-sub">RAI</div>
+                            </div>
+                            <div class="net-card">
+                                <div class="net-card-label">Inflation</div>
+                                <div class="net-card-val yellow orbitron" id="netInflation">—</div>
+                            </div>
+                            <div class="net-card">
+                                <div class="net-card-label">Native Token</div>
+                                <div class="net-card-val cyan orbitron">RAI</div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="net-card">
-                        <div class="net-card-label">Validators</div>
-                        <div class="net-card-val green orbitron" id="netVals">—</div>
-                        <div class="net-card-sub" style="color:var(--green)">Active</div>
+                    <div class="card" style="margin:0">
+                        <div class="card-head">
+                            <div class="card-title">⚙️ Network Details</div>
+                        </div>
+                        <div style="padding:1rem 1.5rem">
+                            <div
+                                style="display:flex;justify-content:space-between;padding:.6rem 0;border-bottom:1px solid var(--border)">
+                                <span style="color:var(--t3);font-size:.82rem">Chain ID</span><span
+                                    style="font-family:'JetBrains Mono';font-size:.82rem;color:var(--cyan)">raitestnet_77701-1</span>
+                            </div>
+                            <div
+                                style="display:flex;justify-content:space-between;padding:.6rem 0;border-bottom:1px solid var(--border)">
+                                <span style="color:var(--t3);font-size:.82rem">Application</span><span
+                                    style="font-family:'JetBrains Mono';font-size:.82rem">republicd</span>
+                            </div>
+                            <div
+                                style="display:flex;justify-content:space-between;padding:.6rem 0;border-bottom:1px solid var(--border)">
+                                <span style="color:var(--t3);font-size:.82rem">CometBFT</span><span
+                                    style="font-family:'JetBrains Mono';font-size:.82rem" id="netCometVersion">—</span>
+                            </div>
+                            <div
+                                style="display:flex;justify-content:space-between;padding:.6rem 0;border-bottom:1px solid var(--border)">
+                                <span style="color:var(--t3);font-size:.82rem">Address Prefix</span><span
+                                    style="font-family:'JetBrains Mono';font-size:.82rem;color:var(--green)">rai</span>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;padding:.6rem 0"><span
+                                    style="color:var(--t3);font-size:.82rem">Denom</span><span
+                                    style="font-family:'JetBrains Mono';font-size:.82rem;color:var(--magenta)">arai</span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="net-card">
-                        <div class="net-card-label">Bonded Tokens</div>
-                        <div class="net-card-val magenta orbitron" id="netBonded">—</div>
-                        <div class="net-card-sub">RAI</div>
+                </div>
+            </div>
+
+            <!-- RECENT ACTIVITY -->
+            <div style="margin-top:2.5rem">
+                <div class="net-header" style="margin-bottom:1.5rem">
+                    <div class="net-dot" style="background:var(--cyan)"></div>
+                    <h2 class="orbitron">Recent Activity</h2>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem">
+                    <div class="card" style="margin:0">
+                        <div class="card-head">
+                            <div class="card-title">🧊 Recent Blocks</div>
+                            <a href="#blocks" onclick="go('blocks')"
+                                style="color:var(--cyan);font-size:.82rem;font-weight:600;text-decoration:none">View all
+                                →</a>
+                        </div>
+                        <div id="homeBlocks">
+                            <div class="loading">
+                                <div class="spinner"></div>
+                                <div class="loading-text">Loading...</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card" style="margin:0">
+                        <div class="card-head">
+                            <div class="card-title">⚡ Recent Transactions</div>
+                            <a href="#txs" onclick="go('txs')"
+                                style="color:var(--cyan);font-size:.82rem;font-weight:600;text-decoration:none">View all
+                                →</a>
+                        </div>
+                        <div id="homeTxs">
+                            <div class="loading">
+                                <div class="spinner"></div>
+                                <div class="loading-text">Loading...</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1303,6 +1391,7 @@
             const nav = document.getElementById('nav-' + page);
             if (nav) nav.classList.add('active');
             window.location.hash = page;
+            if (page === 'home') loadHomeActivity();
             if (page === 'blocks') loadBlocks();
             if (page === 'txs') loadTxs();
         }
@@ -1334,9 +1423,12 @@
         let latestBlockHeight = 0;
         async function loadNetStatus() {
             try {
-                const [blockRes, bondedRes] = await Promise.all([
+                const [blockRes, bondedRes, supplyRes, inflationRes, nodeRes] = await Promise.all([
                     fetch(REST + '/cosmos/base/tendermint/v1beta1/blocks/latest').then(r => r.json()),
-                    fetch(REST + '/cosmos/staking/v1beta1/validators?status=BOND_STATUS_BONDED&pagination.limit=200').then(r => r.json())
+                    fetch(REST + '/cosmos/staking/v1beta1/validators?status=BOND_STATUS_BONDED&pagination.limit=200').then(r => r.json()),
+                    fetch(REST + '/cosmos/bank/v1beta1/supply/arai').then(r => r.json()).catch(() => null),
+                    fetch(REST + '/cosmos/mint/v1beta1/inflation').then(r => r.json()).catch(() => null),
+                    fetch(REST + '/cosmos/base/tendermint/v1beta1/node_info').then(r => r.json()).catch(() => null)
                 ]);
                 const height = blockRes.block?.header?.height || '0';
                 latestBlockHeight = parseInt(height);
@@ -1348,6 +1440,21 @@
                 document.getElementById('netVals').textContent = bonded.length;
                 document.getElementById('heroValCount').textContent = bonded.length + '+';
                 document.getElementById('netBonded').textContent = formatRAI(totalBonded);
+
+                // Total Supply
+                if (supplyRes?.amount?.amount) {
+                    const supply = tokensToRAI(supplyRes.amount.amount);
+                    document.getElementById('netSupply').textContent = supply.toLocaleString(undefined, { maximumFractionDigits: 0 });
+                }
+                // Inflation
+                if (inflationRes?.inflation) {
+                    const inf = (parseFloat(inflationRes.inflation) * 100).toFixed(2);
+                    document.getElementById('netInflation').textContent = inf + '%';
+                }
+                // CometBFT version
+                if (nodeRes?.default_node_info?.version) {
+                    document.getElementById('netCometVersion').textContent = 'v' + nodeRes.default_node_info.version;
+                }
             } catch (e) { console.error('Net status error:', e) }
         }
 
@@ -1693,8 +1800,75 @@
             }
         });
 
+        // HOME RECENT ACTIVITY
+        async function loadHomeActivity() {
+            // Recent Blocks (compact, 8 items)
+            try {
+                await buildValMap();
+                const latRes = await fetch(REST + '/cosmos/base/tendermint/v1beta1/blocks/latest').then(r => r.json());
+                const latH = parseInt(latRes.block?.header?.height || '0');
+                const blockPromises = [];
+                for (let h = latH; h > latH - 8 && h > 0; h--) {
+                    blockPromises.push(fetch(REST + '/cosmos/base/tendermint/v1beta1/blocks/' + h).then(r => r.json()).catch(() => null));
+                }
+                const blocks = await Promise.all(blockPromises);
+                let bHtml = '';
+                blocks.filter(Boolean).forEach(b => {
+                    const h = b.block?.header?.height || '0';
+                    const hash = b.block_id?.hash || '';
+                    const txCount = b.block?.data?.txs?.length || 0;
+                    const time = b.block?.header?.time || '';
+                    const proposer = b.block?.header?.proposer_address || '';
+                    bHtml += `<div class="block-row" style="cursor:pointer" onclick="go('blocks')">
+                        <div class="block-icon">🧊</div>
+                        <div class="block-info-col">
+                            <div class="block-height">#${formatNum(parseInt(h))}${txCount > 0 ? ' <span class="block-tx-badge">' + txCount + ' tx</span>' : ''}</div>
+                            <div class="block-hash">${truncHash(hash)}</div>
+                        </div>
+                        <div class="block-time">${time ? timeAgo(time) : ''}</div>
+                    </div>`;
+                });
+                document.getElementById('homeBlocks').innerHTML = bHtml || '<div class="loading"><div class="loading-text">No blocks</div></div>';
+            } catch (e) { document.getElementById('homeBlocks').innerHTML = '<div class="loading"><div class="loading-text" style="color:var(--pink)">Error loading blocks</div></div>'; }
+
+            // Recent Transactions (compact, 8 items)
+            try {
+                if (!latestBlockHeight) {
+                    const bl = await fetch(REST + '/cosmos/base/tendermint/v1beta1/blocks/latest').then(r => r.json());
+                    latestBlockHeight = parseInt(bl.block?.header?.height || '0');
+                }
+                let txs = [];
+                for (let h = latestBlockHeight; h > latestBlockHeight - 50 && h > 0 && txs.length < 8; h--) {
+                    try {
+                        const d = await fetch(REST + '/cosmos/tx/v1beta1/txs/block/' + h).then(r => r.json());
+                        const blockTxs = d.txs || [];
+                        const blockTime = d.block?.header?.time || '';
+                        const blockH = d.block?.header?.height || h.toString();
+                        for (let i = 0; i < blockTxs.length && txs.length < 8; i++) {
+                            const msgs = blockTxs[i].body?.messages || [];
+                            const msgType = msgs[0]?.['@type']?.split('.').pop() || 'Unknown';
+                            txs.push({ type: msgType, height: blockH, time: blockTime });
+                        }
+                    } catch (e) { }
+                }
+                let tHtml = '';
+                txs.forEach(tx => {
+                    tHtml += `<div class="block-row" style="cursor:pointer" onclick="go('txs')">
+                        <div class="block-icon">⚡</div>
+                        <div class="block-info-col">
+                            <div class="block-height" style="color:var(--magenta)">${tx.type}</div>
+                            <div class="block-hash">Block #${formatNum(parseInt(tx.height))}</div>
+                        </div>
+                        <div class="block-time">${tx.time ? timeAgo(tx.time) : ''}</div>
+                    </div>`;
+                });
+                document.getElementById('homeTxs').innerHTML = tHtml || '<div class="loading"><div class="loading-text">No transactions</div></div>';
+            } catch (e) { document.getElementById('homeTxs').innerHTML = '<div class="loading"><div class="loading-text" style="color:var(--pink)">Error loading txs</div></div>'; }
+        }
+
         // INIT
         loadNetStatus();
+        loadHomeActivity();
         route();
         setInterval(loadNetStatus, 15000);
     </script>

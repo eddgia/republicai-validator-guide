@@ -1,13 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Validators | RepublicAI Explorer</title>
-  <meta name="description" content="Explore active validators on the RepublicAI blockchain network. View voting power, commission rates, uptime statistics and more.">
+  <meta name="description"
+    content="Explore active validators on the RepublicAI blockchain network. View voting power, commission rates, uptime statistics and more.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
   <style>
     :root {
       --bg-primary: #0a0a14;
@@ -34,7 +38,11 @@
       --gradient-purple: linear-gradient(135deg, #b388ff, #7c4dff);
     }
 
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
     body {
       font-family: 'Inter', -apple-system, sans-serif;
@@ -47,8 +55,10 @@
     body::before {
       content: '';
       position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
       background:
         radial-gradient(ellipse at 20% 20%, rgba(0, 229, 255, 0.03) 0%, transparent 50%),
         radial-gradient(ellipse at 80% 80%, rgba(179, 136, 255, 0.03) 0%, transparent 50%);
@@ -60,11 +70,13 @@
     body::after {
       content: '';
       position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
       background-image:
-        linear-gradient(rgba(255,255,255,0.012) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.012) 1px, transparent 1px);
+        linear-gradient(rgba(255, 255, 255, 0.012) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.012) 1px, transparent 1px);
       background-size: 60px 60px;
       pointer-events: none;
       z-index: 0;
@@ -101,7 +113,8 @@
     }
 
     .logo-icon {
-      width: 32px; height: 32px;
+      width: 32px;
+      height: 32px;
       background: var(--gradient-cyan);
       border-radius: 8px;
       display: flex;
@@ -127,7 +140,11 @@
       transition: all 0.2s;
     }
 
-    .nav-links a:hover { color: var(--text-primary); background: rgba(255,255,255,0.05); }
+    .nav-links a:hover {
+      color: var(--text-primary);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
     .nav-links a.active {
       color: var(--cyan);
       background: var(--cyan-glow);
@@ -143,9 +160,14 @@
       transition: border-color 0.2s;
     }
 
-    .search-box:focus-within { border-color: var(--cyan-dim); }
+    .search-box:focus-within {
+      border-color: var(--cyan-dim);
+    }
 
-    .search-box svg { color: var(--text-muted); flex-shrink: 0; }
+    .search-box svg {
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
 
     .search-box input {
       background: none;
@@ -158,7 +180,9 @@
       width: 240px;
     }
 
-    .search-box input::placeholder { color: var(--text-muted); }
+    .search-box input::placeholder {
+      color: var(--text-muted);
+    }
 
     /* MAIN */
     main {
@@ -223,10 +247,21 @@
       font-weight: 700;
     }
 
-    .stat-value.cyan { color: var(--cyan); }
-    .stat-value.green { color: var(--green); }
-    .stat-value.purple { color: var(--purple); }
-    .stat-value.yellow { color: var(--yellow); }
+    .stat-value.cyan {
+      color: var(--cyan);
+    }
+
+    .stat-value.green {
+      color: var(--green);
+    }
+
+    .stat-value.purple {
+      color: var(--purple);
+    }
+
+    .stat-value.yellow {
+      color: var(--yellow);
+    }
 
     .stat-sub {
       font-size: 0.78rem;
@@ -281,7 +316,10 @@
       transition: all 0.2s;
     }
 
-    .tab-btn:hover { color: var(--text-primary); }
+    .tab-btn:hover {
+      color: var(--text-primary);
+    }
+
     .tab-btn.active {
       background: var(--cyan-glow);
       color: var(--cyan);
@@ -304,7 +342,9 @@
       white-space: nowrap;
     }
 
-    thead th.right { text-align: right; }
+    thead th.right {
+      text-align: right;
+    }
 
     tbody tr {
       border-bottom: 1px solid rgba(30, 30, 58, 0.5);
@@ -312,8 +352,13 @@
       cursor: pointer;
     }
 
-    tbody tr:hover { background: var(--bg-card-hover); }
-    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover {
+      background: var(--bg-card-hover);
+    }
+
+    tbody tr:last-child {
+      border-bottom: none;
+    }
 
     td {
       padding: 16px;
@@ -321,7 +366,9 @@
       vertical-align: middle;
     }
 
-    td.right { text-align: right; }
+    td.right {
+      text-align: right;
+    }
 
     .rank {
       font-family: 'JetBrains Mono', monospace;
@@ -338,7 +385,8 @@
     }
 
     .validator-avatar {
-      width: 36px; height: 36px;
+      width: 36px;
+      height: 36px;
       border-radius: 50%;
       background: var(--gradient-cyan);
       display: flex;
@@ -396,7 +444,8 @@
     }
 
     .badge-dot {
-      width: 6px; height: 6px;
+      width: 6px;
+      height: 6px;
       border-radius: 50%;
       background: currentColor;
     }
@@ -431,14 +480,19 @@
     }
 
     .spinner {
-      width: 36px; height: 36px;
+      width: 36px;
+      height: 36px;
       border: 3px solid var(--border);
       border-top-color: var(--cyan);
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
     }
 
-    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
 
     .loading-text {
       color: var(--text-secondary);
@@ -514,7 +568,9 @@
       transition: color 0.2s;
     }
 
-    .footer-links a:hover { color: var(--cyan); }
+    .footer-links a:hover {
+      color: var(--cyan);
+    }
 
     .footer-credit {
       font-size: 0.78rem;
@@ -523,18 +579,47 @@
 
     /* RESPONSIVE */
     @media (max-width: 900px) {
-      .search-box { display: none; }
-      .stats-grid { grid-template-columns: repeat(2, 1fr); }
-      td, th { padding: 12px 10px; }
-      .validator-avatar { display: none; }
+      .search-box {
+        display: none;
+      }
+
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      td,
+      th {
+        padding: 12px 10px;
+      }
+
+      .validator-avatar {
+        display: none;
+      }
     }
 
     @media (max-width: 600px) {
-      main { padding: 1rem; }
-      .stats-grid { grid-template-columns: 1fr; }
-      .table-header { flex-direction: column; gap: 12px; align-items: flex-start; }
-      .nav-links { gap: 0; }
-      .nav-links a { padding: 8px 10px; font-size: 0.8rem; }
+      main {
+        padding: 1rem;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .table-header {
+        flex-direction: column;
+        gap: 12px;
+        align-items: flex-start;
+      }
+
+      .nav-links {
+        gap: 0;
+      }
+
+      .nav-links a {
+        padding: 8px 10px;
+        font-size: 0.8rem;
+      }
     }
 
     /* Highlight row for our validator */
@@ -542,185 +627,192 @@
       background: rgba(0, 229, 255, 0.04);
       border-left: 3px solid var(--cyan);
     }
+
     tbody tr.highlight:hover {
       background: rgba(0, 229, 255, 0.08);
     }
   </style>
 </head>
+
 <body>
 
-<nav>
-  <div class="nav-inner">
-    <a href="#" class="logo">
-      <div class="logo-icon">R</div>
-      <span>Republic<span style="color: var(--cyan)">AI</span></span>
-    </a>
-    <div class="nav-links">
-      <a href="#">Home</a>
-      <a href="#" class="active">Validators</a>
-      <a href="https://rest.republicai.io/swagger/" target="_blank">API</a>
-      <a href="https://github.com/RepublicAI/networks" target="_blank">GitHub</a>
-    </div>
-    <div class="search-box">
-      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-      <input type="text" id="searchInput" placeholder="Search validator...">
-    </div>
-  </div>
-</nav>
-
-<main>
-  <div class="page-header">
-    <h1>Validators</h1>
-    <p>Active validators securing the Republic network · <span style="font-family: 'JetBrains Mono'; color: var(--text-muted);">raitestnet_77701-1</span></p>
-  </div>
-
-  <div class="stats-grid">
-    <div class="stat-card">
-      <div class="stat-label">Active Validators</div>
-      <div class="stat-value cyan" id="statActive">—</div>
-      <div class="stat-sub">Bonded in active set</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Total Bonded</div>
-      <div class="stat-value green" id="statBonded">—</div>
-      <div class="stat-sub" id="statBondedSub">Total RAI staked</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Total Validators</div>
-      <div class="stat-value purple" id="statTotal">—</div>
-      <div class="stat-sub">Active + Inactive</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Avg Commission</div>
-      <div class="stat-value yellow" id="statCommission">—</div>
-      <div class="stat-sub">Across active set</div>
-    </div>
-  </div>
-
-  <div class="table-container">
-    <div class="table-header">
-      <div>
-        <div class="table-title">Validator Set</div>
-        <div class="table-subtitle">Sorted by voting power</div>
+  <nav>
+    <div class="nav-inner">
+      <a href="#" class="logo">
+        <div class="logo-icon">R</div>
+        <span>Republic<span style="color: var(--cyan)">AI</span></span>
+      </a>
+      <div class="nav-links">
+        <a href="#">Home</a>
+        <a href="#" class="active">Validators</a>
+        <a href="https://rest.republicai.io/swagger/" target="_blank">API</a>
+        <a href="https://github.com/RepublicAI/networks" target="_blank">GitHub</a>
       </div>
-      <div class="tab-group">
-        <button class="tab-btn active" data-tab="active" onclick="filterTab(this)">Active</button>
-        <button class="tab-btn" data-tab="inactive" onclick="filterTab(this)">Inactive</button>
-        <button class="tab-btn" data-tab="all" onclick="filterTab(this)">All</button>
+      <div class="search-box">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <circle cx="11" cy="11" r="8" />
+          <path d="m21 21-4.35-4.35" />
+        </svg>
+        <input type="text" id="searchInput" placeholder="Search validator...">
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    <div class="page-header">
+      <h1>Validators</h1>
+      <p>Active validators securing the Republic network · <span
+          style="font-family: 'JetBrains Mono'; color: var(--text-muted);">raitestnet_77701-1</span></p>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Active Validators</div>
+        <div class="stat-value cyan" id="statActive">—</div>
+        <div class="stat-sub">Bonded in active set</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Total Bonded</div>
+        <div class="stat-value green" id="statBonded">—</div>
+        <div class="stat-sub" id="statBondedSub">Total RAI staked</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Total Validators</div>
+        <div class="stat-value purple" id="statTotal">—</div>
+        <div class="stat-sub">Active + Inactive</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Avg Commission</div>
+        <div class="stat-value yellow" id="statCommission">—</div>
+        <div class="stat-sub">Across active set</div>
       </div>
     </div>
 
-    <div id="tableBody">
-      <div class="loading">
-        <div class="spinner"></div>
-        <div class="loading-text">Loading validators...</div>
+    <div class="table-container">
+      <div class="table-header">
+        <div>
+          <div class="table-title">Validator Set</div>
+          <div class="table-subtitle">Sorted by voting power</div>
+        </div>
+        <div class="tab-group">
+          <button class="tab-btn active" data-tab="active" onclick="filterTab(this)">Active</button>
+          <button class="tab-btn" data-tab="inactive" onclick="filterTab(this)">Inactive</button>
+          <button class="tab-btn" data-tab="all" onclick="filterTab(this)">All</button>
+        </div>
       </div>
+
+      <div id="tableBody">
+        <div class="loading">
+          <div class="spinner"></div>
+          <div class="loading-text">Loading validators...</div>
+        </div>
+      </div>
+
+      <div class="pagination" id="pagination" style="display: none;"></div>
     </div>
+  </main>
 
-    <div class="pagination" id="pagination" style="display: none;"></div>
-  </div>
-</main>
+  <footer>
+    <div class="footer-links">
+      <a href="https://github.com/RepublicAI/networks" target="_blank">Networks</a>
+      <a href="https://rest.republicai.io/swagger/" target="_blank">REST API</a>
+      <a href="https://discord.com/invite/republicai" target="_blank">Discord</a>
+      <a href="https://github.com/eddgia/republicai-validator-guide" target="_blank">Guide</a>
+    </div>
+    <div class="footer-credit">
+      Built by <a href="https://github.com/eddgia" target="_blank"
+        style="color: var(--cyan); text-decoration: none;">eddgia</a> · Data from RepublicAI REST API
+    </div>
+  </footer>
 
-<footer>
-  <div class="footer-links">
-    <a href="https://github.com/RepublicAI/networks" target="_blank">Networks</a>
-    <a href="https://rest.republicai.io/swagger/" target="_blank">REST API</a>
-    <a href="https://discord.com/invite/republicai" target="_blank">Discord</a>
-    <a href="https://github.com/eddgia/republicai-validator-guide" target="_blank">Guide</a>
-  </div>
-  <div class="footer-credit">
-    Built by <a href="https://github.com/eddgia" target="_blank" style="color: var(--cyan); text-decoration: none;">eddgia</a> · Data from RepublicAI REST API
-  </div>
-</footer>
+  <script>
+    const REST_API = 'https://rest.republicai.io';
+    const MY_VALOPER = 'raivaloper1yqz02uvdthefkvn2prsn73wf7geveqcj3jphpk'; // highlight our validator
+    const PER_PAGE = 25;
 
-<script>
-const REST_API = 'https://rest.republicai.io';
-const MY_VALOPER = 'raivaloper1yqz02uvdthefkvn2prsn73wf7geveqcj3jphpk'; // highlight our validator
-const PER_PAGE = 25;
+    let allValidators = [];
+    let currentTab = 'active';
+    let currentPage = 1;
 
-let allValidators = [];
-let currentTab = 'active';
-let currentPage = 1;
+    async function fetchValidators(status) {
+      let validators = [];
+      let nextKey = null;
 
-async function fetchValidators(status) {
-  let validators = [];
-  let nextKey = null;
-  
-  do {
-    const params = new URLSearchParams({
-      'pagination.limit': '100',
-      ...(status && { status }),
-      ...(nextKey && { 'pagination.key': nextKey }),
-    });
-    
-    const resp = await fetch(`${REST_API}/cosmos/staking/v1beta1/validators?${params}`);
-    const data = await resp.json();
-    validators = validators.concat(data.validators || []);
-    nextKey = data.pagination?.next_key || null;
-  } while (nextKey);
-  
-  return validators;
-}
+      do {
+        const params = new URLSearchParams({
+          'pagination.limit': '100',
+          ...(status && { status }),
+          ...(nextKey && { 'pagination.key': nextKey }),
+        });
 
-function tokensToRAI(tokens) {
-  const n = BigInt(tokens);
-  const whole = n / BigInt(10**18);
-  return Number(whole);
-}
-
-function formatRAI(amount) {
-  if (amount >= 1e9) return (amount / 1e9).toFixed(1) + 'B';
-  if (amount >= 1e6) return (amount / 1e6).toFixed(1) + 'M';
-  if (amount >= 1e3) return (amount / 1e3).toFixed(1) + 'K';
-  return amount.toLocaleString();
-}
-
-function truncAddr(addr) {
-  if (!addr) return '';
-  return addr.slice(0, 14) + '...' + addr.slice(-6);
-}
-
-function getInitials(moniker) {
-  return moniker.slice(0, 2).toUpperCase();
-}
-
-function getAvatarUrl(identity) {
-  if (identity && identity.length >= 8) {
-    return `https://keybase.io/_/api/1.0/user/lookup.json?key_suffix=${identity}&fields=pictures`;
-  }
-  return null;
-}
-
-async function loadAvatars(validators) {
-  const promises = validators.map(async (v) => {
-    const identity = v.description?.identity;
-    if (identity && identity.length >= 8) {
-      try {
-        const resp = await fetch(`https://keybase.io/_/api/1.0/user/lookup.json?key_suffix=${identity}&fields=pictures`);
+        const resp = await fetch(`${REST_API}/cosmos/staking/v1beta1/validators?${params}`);
         const data = await resp.json();
-        const pic = data?.them?.[0]?.pictures?.primary?.url;
-        if (pic) v._avatar = pic;
-      } catch(e) {}
-    }
-  });
-  await Promise.allSettled(promises);
-}
+        validators = validators.concat(data.validators || []);
+        nextKey = data.pagination?.next_key || null;
+      } while (nextKey);
 
-function renderTable(validators, totalBonded) {
-  if (!validators.length) {
-    document.getElementById('tableBody').innerHTML = `
+      return validators;
+    }
+
+    function tokensToRAI(tokens) {
+      const n = BigInt(tokens);
+      const whole = n / BigInt(10 ** 18);
+      return Number(whole);
+    }
+
+    function formatRAI(amount) {
+      if (amount >= 1e9) return (amount / 1e9).toFixed(1) + 'B';
+      if (amount >= 1e6) return (amount / 1e6).toFixed(1) + 'M';
+      if (amount >= 1e3) return (amount / 1e3).toFixed(1) + 'K';
+      return amount.toLocaleString();
+    }
+
+    function truncAddr(addr) {
+      if (!addr) return '';
+      return addr.slice(0, 14) + '...' + addr.slice(-6);
+    }
+
+    function getInitials(moniker) {
+      return moniker.slice(0, 2).toUpperCase();
+    }
+
+    function getAvatarUrl(identity) {
+      if (identity && identity.length >= 8) {
+        return `https://keybase.io/_/api/1.0/user/lookup.json?key_suffix=${identity}&fields=pictures`;
+      }
+      return null;
+    }
+
+    async function loadAvatars(validators) {
+      const promises = validators.map(async (v) => {
+        const identity = v.description?.identity;
+        if (identity && identity.length >= 8) {
+          try {
+            const resp = await fetch(`https://keybase.io/_/api/1.0/user/lookup.json?key_suffix=${identity}&fields=pictures`);
+            const data = await resp.json();
+            const pic = data?.them?.[0]?.pictures?.primary?.url;
+            if (pic) v._avatar = pic;
+          } catch (e) { }
+        }
+      });
+      await Promise.allSettled(promises);
+    }
+
+    function renderTable(validators, totalBonded) {
+      if (!validators.length) {
+        document.getElementById('tableBody').innerHTML = `
       <div class="loading">
         <div class="loading-text" style="color: var(--text-muted)">No validators found</div>
       </div>`;
-    document.getElementById('pagination').style.display = 'none';
-    return;
-  }
+        document.getElementById('pagination').style.display = 'none';
+        return;
+      }
 
-  const totalPages = Math.ceil(validators.length / PER_PAGE);
-  const start = (currentPage - 1) * PER_PAGE;
-  const pageVals = validators.slice(start, start + PER_PAGE);
+      const totalPages = Math.ceil(validators.length / PER_PAGE);
+      const start = (currentPage - 1) * PER_PAGE;
+      const pageVals = validators.slice(start, start + PER_PAGE);
 
-  let html = `<table>
+      let html = `<table>
     <thead>
       <tr>
         <th>#</th>
@@ -732,31 +824,31 @@ function renderTable(validators, totalBonded) {
     </thead>
     <tbody>`;
 
-  pageVals.forEach((v, i) => {
-    const rank = start + i + 1;
-    const moniker = v.description?.moniker || 'Unknown';
-    const addr = v.operator_address;
-    const tokens = tokensToRAI(v.tokens);
-    const pct = totalBonded > 0 ? ((tokens / totalBonded) * 100).toFixed(2) : '0.00';
-    const commission = (parseFloat(v.commission?.commission_rates?.rate || '0') * 100).toFixed(2);
-    const isActive = v.status === 'BOND_STATUS_BONDED';
-    const isJailed = v.jailed;
-    const isMe = addr === MY_VALOPER;
-    const avatar = v._avatar 
-      ? `<img src="${v._avatar}" alt="${moniker}">`
-      : getInitials(moniker);
+      pageVals.forEach((v, i) => {
+        const rank = start + i + 1;
+        const moniker = v.description?.moniker || 'Unknown';
+        const addr = v.operator_address;
+        const tokens = tokensToRAI(v.tokens);
+        const pct = totalBonded > 0 ? ((tokens / totalBonded) * 100).toFixed(2) : '0.00';
+        const commission = (parseFloat(v.commission?.commission_rates?.rate || '0') * 100).toFixed(2);
+        const isActive = v.status === 'BOND_STATUS_BONDED';
+        const isJailed = v.jailed;
+        const isMe = addr === MY_VALOPER;
+        const avatar = v._avatar
+          ? `<img src="${v._avatar}" alt="${moniker}">`
+          : getInitials(moniker);
 
-    let statusBadge;
-    if (isJailed) {
-      statusBadge = '<span class="badge jailed"><span class="badge-dot"></span>Jailed</span>';
-    } else if (isActive) {
-      statusBadge = '<span class="badge active"><span class="badge-dot"></span>Active</span>';
-    } else {
-      statusBadge = '<span class="badge inactive"><span class="badge-dot"></span>Inactive</span>';
-    }
+        let statusBadge;
+        if (isJailed) {
+          statusBadge = '<span class="badge jailed"><span class="badge-dot"></span>Jailed</span>';
+        } else if (isActive) {
+          statusBadge = '<span class="badge active"><span class="badge-dot"></span>Active</span>';
+        } else {
+          statusBadge = '<span class="badge inactive"><span class="badge-dot"></span>Inactive</span>';
+        }
 
-    html += `
-      <tr class="${isMe ? 'highlight' : ''}">
+        html += `
+      <tr class="${isMe ? 'highlight' : ''}" onclick="window.parent.location.hash='validator/${addr}'">>
         <td class="rank">${rank}</td>
         <td>
           <div class="validator-info">
@@ -776,151 +868,152 @@ function renderTable(validators, totalBonded) {
           <span class="commission">${commission}%</span>
         </td>
       </tr>`;
-  });
+      });
 
-  html += '</tbody></table>';
-  document.getElementById('tableBody').innerHTML = html;
+      html += '</tbody></table>';
+      document.getElementById('tableBody').innerHTML = html;
 
-  // Pagination
-  if (totalPages > 1) {
-    let pagHtml = `<button class="page-btn" onclick="goPage(${currentPage - 1})" ${currentPage <= 1 ? 'disabled' : ''}>← Prev</button>`;
-    
-    for (let p = 1; p <= totalPages; p++) {
-      if (totalPages <= 7 || p <= 2 || p >= totalPages - 1 || Math.abs(p - currentPage) <= 1) {
-        pagHtml += `<button class="page-btn ${p === currentPage ? 'active' : ''}" onclick="goPage(${p})">${p}</button>`;
-      } else if (p === 3 && currentPage > 4) {
-        pagHtml += `<span class="page-info">...</span>`;
-      } else if (p === totalPages - 2 && currentPage < totalPages - 3) {
-        pagHtml += `<span class="page-info">...</span>`;
+      // Pagination
+      if (totalPages > 1) {
+        let pagHtml = `<button class="page-btn" onclick="goPage(${currentPage - 1})" ${currentPage <= 1 ? 'disabled' : ''}>← Prev</button>`;
+
+        for (let p = 1; p <= totalPages; p++) {
+          if (totalPages <= 7 || p <= 2 || p >= totalPages - 1 || Math.abs(p - currentPage) <= 1) {
+            pagHtml += `<button class="page-btn ${p === currentPage ? 'active' : ''}" onclick="goPage(${p})">${p}</button>`;
+          } else if (p === 3 && currentPage > 4) {
+            pagHtml += `<span class="page-info">...</span>`;
+          } else if (p === totalPages - 2 && currentPage < totalPages - 3) {
+            pagHtml += `<span class="page-info">...</span>`;
+          }
+        }
+
+        pagHtml += `<button class="page-btn" onclick="goPage(${currentPage + 1})" ${currentPage >= totalPages ? 'disabled' : ''}>Next →</button>`;
+        document.getElementById('pagination').innerHTML = pagHtml;
+        document.getElementById('pagination').style.display = 'flex';
+      } else {
+        document.getElementById('pagination').style.display = 'none';
       }
     }
-    
-    pagHtml += `<button class="page-btn" onclick="goPage(${currentPage + 1})" ${currentPage >= totalPages ? 'disabled' : ''}>Next →</button>`;
-    document.getElementById('pagination').innerHTML = pagHtml;
-    document.getElementById('pagination').style.display = 'flex';
-  } else {
-    document.getElementById('pagination').style.display = 'none';
-  }
-}
 
-function goPage(p) {
-  const filtered = getFilteredValidators();
-  const totalPages = Math.ceil(filtered.length / PER_PAGE);
-  currentPage = Math.max(1, Math.min(p, totalPages));
-  const totalBonded = allValidators
-    .filter(v => v.status === 'BOND_STATUS_BONDED')
-    .reduce((s, v) => s + tokensToRAI(v.tokens), 0);
-  renderTable(filtered, totalBonded);
-}
-
-function getFilteredValidators() {
-  let filtered = [...allValidators];
-  
-  // Tab filter
-  if (currentTab === 'active') {
-    filtered = filtered.filter(v => v.status === 'BOND_STATUS_BONDED');
-  } else if (currentTab === 'inactive') {
-    filtered = filtered.filter(v => v.status !== 'BOND_STATUS_BONDED');
-  }
-  
-  // Search filter
-  const query = document.getElementById('searchInput').value.toLowerCase().trim();
-  if (query) {
-    filtered = filtered.filter(v => 
-      (v.description?.moniker || '').toLowerCase().includes(query) ||
-      v.operator_address.toLowerCase().includes(query)
-    );
-  }
-  
-  // Sort by tokens desc
-  filtered.sort((a, b) => {
-    const ta = BigInt(a.tokens);
-    const tb = BigInt(b.tokens);
-    return tb > ta ? 1 : tb < ta ? -1 : 0;
-  });
-  
-  return filtered;
-}
-
-function filterTab(btn) {
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  currentTab = btn.dataset.tab;
-  currentPage = 1;
-  const filtered = getFilteredValidators();
-  const totalBonded = allValidators
-    .filter(v => v.status === 'BOND_STATUS_BONDED')
-    .reduce((s, v) => s + tokensToRAI(v.tokens), 0);
-  renderTable(filtered, totalBonded);
-}
-
-// Search
-document.getElementById('searchInput').addEventListener('input', () => {
-  currentPage = 1;
-  const filtered = getFilteredValidators();
-  const totalBonded = allValidators
-    .filter(v => v.status === 'BOND_STATUS_BONDED')
-    .reduce((s, v) => s + tokensToRAI(v.tokens), 0);
-  renderTable(filtered, totalBonded);
-});
-
-async function init() {
-  try {
-    // Fetch bonded and unbonded validators
-    const [bonded, unbonded, unbonding] = await Promise.all([
-      fetchValidators('BOND_STATUS_BONDED'),
-      fetchValidators('BOND_STATUS_UNBONDED'),
-      fetchValidators('BOND_STATUS_UNBONDING'),
-    ]);
-
-    allValidators = [...bonded, ...unbonded, ...unbonding];
-    
-    // Remove duplicates
-    const seen = new Set();
-    allValidators = allValidators.filter(v => {
-      if (seen.has(v.operator_address)) return false;
-      seen.add(v.operator_address);
-      return true;
-    });
-
-    // Sort by tokens descending
-    allValidators.sort((a, b) => {
-      const ta = BigInt(a.tokens);
-      const tb = BigInt(b.tokens);
-      return tb > ta ? 1 : tb < ta ? -1 : 0;
-    });
-
-    // Compute stats
-    const activeCount = bonded.length;
-    const totalBonded = bonded.reduce((s, v) => s + tokensToRAI(v.tokens), 0);
-    const avgCommission = bonded.length > 0
-      ? bonded.reduce((s, v) => s + parseFloat(v.commission?.commission_rates?.rate || '0'), 0) / bonded.length * 100
-      : 0;
-
-    document.getElementById('statActive').textContent = activeCount;
-    document.getElementById('statBonded').textContent = formatRAI(totalBonded) + ' RAI';
-    document.getElementById('statTotal').textContent = allValidators.length;
-    document.getElementById('statCommission').textContent = avgCommission.toFixed(1) + '%';
-
-    // Load avatars in background
-    loadAvatars(allValidators).then(() => {
+    function goPage(p) {
       const filtered = getFilteredValidators();
+      const totalPages = Math.ceil(filtered.length / PER_PAGE);
+      currentPage = Math.max(1, Math.min(p, totalPages));
+      const totalBonded = allValidators
+        .filter(v => v.status === 'BOND_STATUS_BONDED')
+        .reduce((s, v) => s + tokensToRAI(v.tokens), 0);
+      renderTable(filtered, totalBonded);
+    }
+
+    function getFilteredValidators() {
+      let filtered = [...allValidators];
+
+      // Tab filter
+      if (currentTab === 'active') {
+        filtered = filtered.filter(v => v.status === 'BOND_STATUS_BONDED');
+      } else if (currentTab === 'inactive') {
+        filtered = filtered.filter(v => v.status !== 'BOND_STATUS_BONDED');
+      }
+
+      // Search filter
+      const query = document.getElementById('searchInput').value.toLowerCase().trim();
+      if (query) {
+        filtered = filtered.filter(v =>
+          (v.description?.moniker || '').toLowerCase().includes(query) ||
+          v.operator_address.toLowerCase().includes(query)
+        );
+      }
+
+      // Sort by tokens desc
+      filtered.sort((a, b) => {
+        const ta = BigInt(a.tokens);
+        const tb = BigInt(b.tokens);
+        return tb > ta ? 1 : tb < ta ? -1 : 0;
+      });
+
+      return filtered;
+    }
+
+    function filterTab(btn) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentTab = btn.dataset.tab;
+      currentPage = 1;
+      const filtered = getFilteredValidators();
+      const totalBonded = allValidators
+        .filter(v => v.status === 'BOND_STATUS_BONDED')
+        .reduce((s, v) => s + tokensToRAI(v.tokens), 0);
+      renderTable(filtered, totalBonded);
+    }
+
+    // Search
+    document.getElementById('searchInput').addEventListener('input', () => {
+      currentPage = 1;
+      const filtered = getFilteredValidators();
+      const totalBonded = allValidators
+        .filter(v => v.status === 'BOND_STATUS_BONDED')
+        .reduce((s, v) => s + tokensToRAI(v.tokens), 0);
       renderTable(filtered, totalBonded);
     });
 
-    // Initial render
-    const filtered = getFilteredValidators();
-    renderTable(filtered, totalBonded);
+    async function init() {
+      try {
+        // Fetch bonded and unbonded validators
+        const [bonded, unbonded, unbonding] = await Promise.all([
+          fetchValidators('BOND_STATUS_BONDED'),
+          fetchValidators('BOND_STATUS_UNBONDED'),
+          fetchValidators('BOND_STATUS_UNBONDING'),
+        ]);
 
-  } catch (err) {
-    document.getElementById('tableBody').innerHTML = `
+        allValidators = [...bonded, ...unbonded, ...unbonding];
+
+        // Remove duplicates
+        const seen = new Set();
+        allValidators = allValidators.filter(v => {
+          if (seen.has(v.operator_address)) return false;
+          seen.add(v.operator_address);
+          return true;
+        });
+
+        // Sort by tokens descending
+        allValidators.sort((a, b) => {
+          const ta = BigInt(a.tokens);
+          const tb = BigInt(b.tokens);
+          return tb > ta ? 1 : tb < ta ? -1 : 0;
+        });
+
+        // Compute stats
+        const activeCount = bonded.length;
+        const totalBonded = bonded.reduce((s, v) => s + tokensToRAI(v.tokens), 0);
+        const avgCommission = bonded.length > 0
+          ? bonded.reduce((s, v) => s + parseFloat(v.commission?.commission_rates?.rate || '0'), 0) / bonded.length * 100
+          : 0;
+
+        document.getElementById('statActive').textContent = activeCount;
+        document.getElementById('statBonded').textContent = formatRAI(totalBonded) + ' RAI';
+        document.getElementById('statTotal').textContent = allValidators.length;
+        document.getElementById('statCommission').textContent = avgCommission.toFixed(1) + '%';
+
+        // Load avatars in background
+        loadAvatars(allValidators).then(() => {
+          const filtered = getFilteredValidators();
+          renderTable(filtered, totalBonded);
+        });
+
+        // Initial render
+        const filtered = getFilteredValidators();
+        renderTable(filtered, totalBonded);
+
+      } catch (err) {
+        document.getElementById('tableBody').innerHTML = `
       <div class="loading">
         <div class="loading-text" style="color: var(--red)">Failed to load validators: ${err.message}</div>
       </div>`;
-  }
-}
+      }
+    }
 
-init();
-</script>
+    init();
+  </script>
 </body>
+
 </html>
