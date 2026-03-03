@@ -1004,20 +1004,19 @@
             return a.toLocaleString();
         }
 
-        // LOAD NETWORK STATUS 
+        // LOAD NETWORK STATUS (all via REST API for CORS)
+        let latestBlockHeight = 0;
         async function loadNetStatus() {
             try {
-                const [statusRes, valsRes] = await Promise.all([
-                    fetch(RPC + '/status').then(r => r.json()),
-                    fetch(REST + '/cosmos/staking/v1beta1/validators?status=BOND_STATUS_BONDED&pagination.limit=1&pagination.count_total=true').then(r => r.json())
+                const [blockRes, bondedRes] = await Promise.all([
+                    fetch(REST + '/cosmos/base/tendermint/v1beta1/blocks/latest').then(r => r.json()),
+                    fetch(REST + '/cosmos/staking/v1beta1/validators?status=BOND_STATUS_BONDED&pagination.limit=200').then(r => r.json())
                 ]);
-                const height = statusRes.result.sync_info.latest_block_height;
-                document.getElementById('netHeight').textContent = formatNum(parseInt(height));
+                const height = blockRes.block?.header?.height || '0';
+                latestBlockHeight = parseInt(height);
+                document.getElementById('netHeight').textContent = formatNum(latestBlockHeight);
 
-                // count bonded validators
-                const bondedRes = await fetch(REST + '/cosmos/staking/v1beta1/validators?status=BOND_STATUS_BONDED&pagination.limit=200');
-                const bondedData = await bondedRes.json();
-                const bonded = bondedData.validators || [];
+                const bonded = bondedRes.validators || [];
                 const totalBonded = bonded.reduce((s, v) => s + tokensToRAI(v.tokens), 0);
 
                 document.getElementById('netVals').textContent = bonded.length;
@@ -1047,23 +1046,24 @@
 
             try {
                 await buildValMap();
-                // Fetch latest block first
-                const latestRes = await fetch(RPC + '/block');
+                // Get latest block via REST
+                const latestRes = await fetch(REST + '/cosmos/base/tendermint/v1beta1/blocks/latest');
                 const latestData = await latestRes.json();
-                const latestHeight = parseInt(latestData.result.block.header.height);
+                const latestHeight = parseInt(latestData.block?.header?.height || '0');
 
-                // Fetch last 20 blocks
-                const blocks = [];
+                // Fetch last 20 blocks via REST
                 const promises = [];
                 for (let h = latestHeight; h > latestHeight - 20 && h > 0; h--) {
                     promises.push(
-                        fetch(RPC + '/block?height=' + h).then(r => r.json()).then(d => ({
-                            height: d.result.block.header.height,
-                            hash: d.result.block_id.hash,
-                            time: d.result.block.header.time,
-                            txCount: d.result.block.data.txs ? d.result.block.data.txs.length : 0,
-                            proposer: d.result.block.header.proposer_address
-                        })).catch(() => null)
+                        fetch(REST + '/cosmos/base/tendermint/v1beta1/blocks/' + h)
+                            .then(r => r.json())
+                            .then(d => ({
+                                height: d.block?.header?.height,
+                                hash: d.block_id?.hash || '',
+                                time: d.block?.header?.time,
+                                txCount: d.block?.data?.txs ? d.block.data.txs.length : 0,
+                                proposer: d.block?.header?.proposer_address || ''
+                            })).catch(() => null)
                     );
                 }
                 const results = (await Promise.all(promises)).filter(Boolean);
@@ -1095,27 +1095,33 @@
             }
         }
 
-        // LOAD TRANSACTIONS
+        // LOAD TRANSACTIONS (all via REST)
         async function loadTxs() {
             const container = document.getElementById('txList');
             container.innerHTML = '<div class="loading"><div class="spinner"></div><div class="loading-text">Loading transactions...</div></div>';
 
             try {
-                // Fetch latest block to get recent txs
-                const latestRes = await fetch(RPC + '/block');
-                const latestH = parseInt((await latestRes.json()).result.block.header.height);
+                // Use latestBlockHeight from loadNetStatus, or fetch it
+                if (!latestBlockHeight) {
+                    const bl = await fetch(REST + '/cosmos/base/tendermint/v1beta1/blocks/latest').then(r => r.json());
+                    latestBlockHeight = parseInt(bl.block?.header?.height || '0');
+                }
 
                 let allTxs = [];
-                // Search recent blocks for transactions
-                for (let h = latestH; h > latestH - 50 && h > 0; h--) {
-                    try {
-                        const r = await fetch(REST + '/cosmos/tx/v1beta1/txs?events=tx.height=' + h + '&pagination.limit=10');
-                        const d = await r.json();
-                        if (d.tx_responses && d.tx_responses.length > 0) {
-                            allTxs = allTxs.concat(d.tx_responses);
-                        }
-                        if (allTxs.length >= 20) break;
-                    } catch (e) { }
+                // Batch fetch txs from recent blocks
+                const batchSize = 10;
+                for (let start = latestBlockHeight; start > latestBlockHeight - 100 && start > 0 && allTxs.length < 20; start -= batchSize) {
+                    const batchPromises = [];
+                    for (let h = start; h > start - batchSize && h > 0; h--) {
+                        batchPromises.push(
+                            fetch(REST + '/cosmos/tx/v1beta1/txs?events=tx.height=' + h + '&pagination.limit=10')
+                                .then(r => r.json())
+                                .then(d => d.tx_responses || [])
+                                .catch(() => [])
+                        );
+                    }
+                    const batchResults = await Promise.all(batchPromises);
+                    batchResults.forEach(txs => { allTxs = allTxs.concat(txs); });
                 }
 
                 document.getElementById('txCount').textContent = allTxs.length + ' transactions';
@@ -1124,6 +1130,9 @@
                     container.innerHTML = '<div class="loading"><div class="loading-text">No recent transactions found</div></div>';
                     return;
                 }
+
+                // Sort by height desc
+                allTxs.sort((a, b) => parseInt(b.height) - parseInt(a.height));
 
                 let html = '<div style="display:grid;grid-template-columns:1.2fr 1.5fr .6fr .5fr;padding:12px 1.5rem;font-size:.72rem;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;font-weight:600;border-bottom:1px solid var(--border)"><div>TX Hash</div><div>Type</div><div>Status</div><div style="text-align:right">Block</div></div>';
 
