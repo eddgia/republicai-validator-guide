@@ -780,6 +780,313 @@
                 font-size: .78rem
             }
         }
+
+        /* VALIDATOR DETAIL */
+        .vd-hero {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 2rem
+        }
+
+        .vd-avatar {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--cyan), var(--purple));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: #000;
+            flex-shrink: 0
+        }
+
+        .vd-name {
+            font-family: 'Orbitron';
+            font-size: 1.8rem;
+            font-weight: 800;
+            letter-spacing: 1px
+        }
+
+        .vd-status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: .7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 4px
+        }
+
+        .vd-status.active {
+            background: var(--green-g);
+            color: var(--green);
+            border: 1px solid rgba(0, 230, 118, .3)
+        }
+
+        .vd-status.inactive {
+            background: var(--pink-g);
+            color: var(--pink);
+            border: 1px solid rgba(255, 64, 129, .3)
+        }
+
+        .vd-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem
+        }
+
+        .vd-section {
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden
+        }
+
+        .vd-section-head {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            font-weight: 700;
+            font-size: .95rem;
+            display: flex;
+            align-items: center;
+            gap: 8px
+        }
+
+        .vd-section-body {
+            padding: 1.2rem 1.5rem
+        }
+
+        .vd-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: .8rem 0;
+            border-bottom: 1px solid rgba(26, 26, 58, .3)
+        }
+
+        .vd-row:last-child {
+            border-bottom: none
+        }
+
+        .vd-label {
+            color: var(--t3);
+            font-size: .78rem;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            font-weight: 600
+        }
+
+        .vd-value {
+            font-family: 'JetBrains Mono';
+            font-size: .82rem;
+            color: var(--t1);
+            word-break: break-all;
+            max-width: 60%;
+            text-align: right
+        }
+
+        .vd-value.cyan {
+            color: var(--cyan)
+        }
+
+        .vd-stat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0
+        }
+
+        .vd-stat {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            border-right: 1px solid var(--border)
+        }
+
+        .vd-stat:nth-child(even) {
+            border-right: none
+        }
+
+        .vd-stat:nth-last-child(-n+2) {
+            border-bottom: none
+        }
+
+        .vd-stat-label {
+            font-size: .68rem;
+            color: var(--t3);
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            margin-bottom: 6px
+        }
+
+        .vd-stat-val {
+            font-family: 'Orbitron';
+            font-size: 1.2rem;
+            font-weight: 700
+        }
+
+        .vd-stat-val.green {
+            color: var(--green)
+        }
+
+        .vd-stat-val.magenta {
+            color: var(--magenta)
+        }
+
+        .vd-stat-val.cyan {
+            color: var(--cyan)
+        }
+
+        .vd-stat-val.purple {
+            color: var(--purple)
+        }
+
+        .vd-stat-sub {
+            font-size: .72rem;
+            color: var(--t3);
+            margin-top: 2px
+        }
+
+        .vd-uptime {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: .8rem 0;
+            margin-bottom: .8rem
+        }
+
+        .vd-uptime-val {
+            font-family: 'Orbitron';
+            font-size: 2rem;
+            font-weight: 900;
+            color: var(--green)
+        }
+
+        .vd-blocks-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: .8rem
+        }
+
+        .vd-blocks-label {
+            font-size: .82rem;
+            color: var(--t2)
+        }
+
+        .vd-blocks-count {
+            font-size: .82rem;
+            color: var(--t2)
+        }
+
+        .vd-block-grid {
+            display: grid;
+            grid-template-columns: repeat(20, 1fr);
+            gap: 3px;
+            margin-bottom: .8rem
+        }
+
+        .vd-block-cell {
+            width: 100%;
+            aspect-ratio: 1;
+            border-radius: 3px;
+            transition: all .15s;
+            cursor: pointer;
+            position: relative
+        }
+
+        .vd-block-cell.signed {
+            background: var(--green);
+            box-shadow: 0 0 4px rgba(0, 230, 118, .3)
+        }
+
+        .vd-block-cell.missed {
+            background: var(--pink);
+            box-shadow: 0 0 4px rgba(255, 64, 129, .3)
+        }
+
+        .vd-block-cell:hover {
+            transform: scale(1.3);
+            z-index: 2
+        }
+
+        .vd-block-cell .tooltip {
+            display: none;
+            position: absolute;
+            bottom: 120%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: .7rem;
+            white-space: nowrap;
+            z-index: 10;
+            color: var(--t1)
+        }
+
+        .vd-block-cell:hover .tooltip {
+            display: block
+        }
+
+        .vd-legend {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: .6rem 0
+        }
+
+        .vd-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: .78rem;
+            color: var(--t2)
+        }
+
+        .vd-legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px
+        }
+
+        .vd-legend-dot.signed {
+            background: var(--green)
+        }
+
+        .vd-legend-dot.missed {
+            background: var(--pink)
+        }
+
+        .vd-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--cyan);
+            font-size: .88rem;
+            font-weight: 600;
+            margin-top: 1.5rem;
+            cursor: pointer;
+            transition: opacity .2s
+        }
+
+        .vd-back:hover {
+            opacity: .7
+        }
+
+        @media(max-width:900px) {
+            .vd-grid {
+                grid-template-columns: 1fr
+            }
+
+            .vd-block-grid {
+                grid-template-columns: repeat(10, 1fr)
+            }
+        }
     </style>
 </head>
 
@@ -953,6 +1260,16 @@
             </div>
         </div>
 
+        <!-- VALIDATOR DETAIL -->
+        <div class="page" id="page-valdetail">
+            <div id="valDetailContent">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <div class="loading-text">Loading validator...</div>
+                </div>
+            </div>
+        </div>
+
     </main>
 
     <footer>
@@ -971,9 +1288,17 @@
         const REST = 'https://rest.republicai.io';
 
         // ROUTING
-        function go(page) {
+        function go(page, extra) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+            if (page.startsWith('validator/')) {
+                document.getElementById('page-valdetail').classList.add('active');
+                const nav = document.getElementById('nav-validators');
+                if (nav) nav.classList.add('active');
+                window.location.hash = page;
+                loadValidatorDetail(page.replace('validator/', ''));
+                return;
+            }
             document.getElementById('page-' + page).classList.add('active');
             const nav = document.getElementById('nav-' + page);
             if (nav) nav.classList.add('active');
@@ -984,6 +1309,7 @@
 
         function route() {
             const h = window.location.hash.replace('#', '');
+            if (h.startsWith('validator/')) { go(h); return; }
             go(h || 'home');
         }
         window.addEventListener('hashchange', route);
@@ -1179,6 +1505,178 @@
       </div>`;
                 });
                 container.innerHTML = html;
+            } catch (e) {
+                container.innerHTML = `<div class="loading"><div class="loading-text" style="color:var(--pink)">Error: ${e.message}</div></div>`;
+            }
+        }
+
+        // VALIDATOR DETAIL
+        async function loadValidatorDetail(valoper) {
+            const container = document.getElementById('valDetailContent');
+            container.innerHTML = '<div class="loading"><div class="spinner"></div><div class="loading-text">Loading validator...</div></div>';
+            try {
+                // Fetch validator info
+                const valRes = await fetch(REST + '/cosmos/staking/v1beta1/validators/' + valoper).then(r => r.json());
+                const v = valRes.validator;
+                if (!v) { container.innerHTML = '<div class="loading"><div class="loading-text" style="color:var(--pink)">Validator not found</div></div>'; return; }
+
+                const moniker = v.description?.moniker || 'Unknown';
+                const isActive = v.status === 'BOND_STATUS_BONDED';
+                const tokens = tokensToRAI(v.tokens);
+                const commission = (parseFloat(v.commission.commission_rates.rate) * 100).toFixed(2);
+                const details = v.description?.details || 'No description';
+                const initial = moniker.charAt(0).toUpperCase();
+
+                // Convert operator address to account address
+                const accAddr = valoper.replace('raivaloper', 'rai1');
+
+                // Fetch delegations count
+                let delegatorCount = 0;
+                try {
+                    const delRes = await fetch(REST + '/cosmos/staking/v1beta1/validators/' + valoper + '/delegations?pagination.limit=1&pagination.count_total=true').then(r => r.json());
+                    delegatorCount = parseInt(delRes.pagination?.total || '0');
+                } catch (e) { }
+
+                // Fetch self delegation
+                let selfBonded = 0;
+                try {
+                    const selfRes = await fetch(REST + '/cosmos/staking/v1beta1/validators/' + valoper + '/delegations/' + accAddr).then(r => r.json());
+                    if (selfRes.delegation_response?.balance?.amount) {
+                        selfBonded = tokensToRAI(selfRes.delegation_response.balance.amount);
+                    }
+                } catch (e) { }
+
+                // Fetch signing info for uptime (get all and find matching)
+                let missedBlocks = 0;
+                let consAddr = '';
+                try {
+                    const sigRes = await fetch(REST + '/cosmos/slashing/v1beta1/signing_infos?pagination.limit=500').then(r => r.json());
+                    // We need consensus address from pubkey - for now check all
+                    // Use the validator's consensus pubkey to find matching signing info
+                    const infos = sigRes.info || [];
+                    // Try to find by checking slashing params
+                    // For now, use a heuristic: fetch latest blocks and check signatures
+                    if (infos.length > 0) {
+                        // Store all for later matching
+                        window._signingInfos = infos;
+                    }
+                } catch (e) { }
+
+                // Fetch last 100 blocks to check participation
+                const latestBlockRes = await fetch(REST + '/cosmos/base/tendermint/v1beta1/blocks/latest').then(r => r.json());
+                const latestH = parseInt(latestBlockRes.block?.header?.height || '0');
+
+                // Get validator's consensus hex address from pubkey
+                let valConsHex = '';
+                try {
+                    const pubkeyBase64 = v.consensus_pubkey?.key || '';
+                    if (pubkeyBase64) {
+                        const raw = Uint8Array.from(atob(pubkeyBase64), c => c.charCodeAt(0));
+                        const hashBuf = await crypto.subtle.digest('SHA-256', raw);
+                        const hashArr = new Uint8Array(hashBuf);
+                        // Take first 20 bytes as validator address
+                        valConsHex = Array.from(hashArr.slice(0, 20)).map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+                    }
+                } catch (e) { console.error('Pubkey hash error:', e); }
+
+                // Check last 100 blocks for this validator's signature
+                let signed = 0, total = 100;
+                const blockResults = [];
+                const batchSize = 20;
+                for (let start = latestH; start > latestH - total && start > 0; start -= batchSize) {
+                    const promises = [];
+                    for (let h = start; h > start - batchSize && h > latestH - total && h > 0; h--) {
+                        promises.push(
+                            fetch(REST + '/cosmos/base/tendermint/v1beta1/blocks/' + h)
+                                .then(r => r.json())
+                                .then(d => {
+                                    const sigs = d.block?.last_commit?.signatures || [];
+                                    // Check base64 encoded addresses
+                                    let didSign = false;
+                                    if (valConsHex) {
+                                        didSign = sigs.some(s => {
+                                            if (!s.validator_address || s.block_id_flag === 'BLOCK_ID_FLAG_ABSENT') return false;
+                                            try {
+                                                const addrBytes = Uint8Array.from(atob(s.validator_address), c => c.charCodeAt(0));
+                                                const addrHex = Array.from(addrBytes).map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+                                                return addrHex === valConsHex;
+                                            } catch (e) { return false; }
+                                        });
+                                    }
+                                    return { height: d.block?.header?.height, signed: didSign };
+                                })
+                                .catch(() => ({ height: String(start), signed: false }))
+                        );
+                    }
+                    blockResults.push(...await Promise.all(promises));
+                }
+                blockResults.sort((a, b) => parseInt(b.height) - parseInt(a.height));
+                signed = blockResults.filter(b => b.signed).length;
+                const uptime = total > 0 ? ((signed / total) * 100).toFixed(2) : '0.00';
+
+                // Build HTML
+                let gridHTML = '';
+                blockResults.forEach(b => {
+                    const cls = b.signed ? 'signed' : 'missed';
+                    gridHTML += `<div class="vd-block-cell ${cls}"><span class="tooltip">#${formatNum(parseInt(b.height))} - ${b.signed ? 'Signed' : 'Missed'}</span></div>`;
+                });
+
+                container.innerHTML = `
+                <div class="vd-hero">
+                    <div class="vd-avatar">${initial}</div>
+                    <div>
+                        <div class="vd-name">${moniker}</div>
+                        <div class="vd-status ${isActive ? 'active' : 'inactive'}">${isActive ? 'Active' : 'Inactive'}</div>
+                    </div>
+                </div>
+
+                <div class="vd-grid">
+                    <div class="vd-section">
+                        <div class="vd-section-head">ℹ️ Overview</div>
+                        <div class="vd-section-body">
+                            <div class="vd-row"><div class="vd-label">Operator Address</div><div class="vd-value">${valoper}</div></div>
+                            <div class="vd-row"><div class="vd-label">Account Address</div><div class="vd-value cyan">${accAddr}</div></div>
+                        </div>
+                        <div class="vd-stat-grid">
+                            <div class="vd-stat"><div class="vd-stat-label">Total Bonded</div><div class="vd-stat-val green">${tokens.toLocaleString(undefined, { maximumFractionDigits: 2 })} RAI</div></div>
+                            <div class="vd-stat"><div class="vd-stat-label">Commission</div><div class="vd-stat-val magenta">${commission}%</div></div>
+                            <div class="vd-stat"><div class="vd-stat-label">Self Bonded</div><div class="vd-stat-val">${selfBonded.toLocaleString(undefined, { maximumFractionDigits: 5 })} RAI</div></div>
+                            <div class="vd-stat"><div class="vd-stat-label">Delegators</div><div class="vd-stat-val purple">${delegatorCount}</div></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="vd-section" style="margin-bottom:1.5rem">
+                            <div class="vd-section-head">📄 Description</div>
+                            <div class="vd-section-body">
+                                <div class="vd-label" style="margin-bottom:6px">Details</div>
+                                <div style="color:var(--t1);font-size:.9rem;line-height:1.6">${details}</div>
+                            </div>
+                        </div>
+
+                        <div class="vd-section">
+                            <div class="vd-section-head">📊 Block Participation</div>
+                            <div class="vd-section-body">
+                                <div class="vd-uptime">
+                                    <div class="vd-blocks-label">Uptime</div>
+                                    <div class="vd-uptime-val">${uptime}%</div>
+                                </div>
+                                <div class="vd-blocks-head">
+                                    <div class="vd-blocks-label">Last ${total} Blocks</div>
+                                    <div class="vd-blocks-count">${signed} / ${total} signed</div>
+                                </div>
+                                <div class="vd-block-grid">${gridHTML}</div>
+                                <div class="vd-legend">
+                                    <div class="vd-legend-item"><div class="vd-legend-dot signed"></div> Signed</div>
+                                    <div class="vd-legend-item"><div class="vd-legend-dot missed"></div> Missed</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="vd-back" onclick="go('validators')">← Back to validators</div>
+                `;
             } catch (e) {
                 container.innerHTML = `<div class="loading"><div class="loading-text" style="color:var(--pink)">Error: ${e.message}</div></div>`;
             }
