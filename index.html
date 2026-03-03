@@ -1426,7 +1426,7 @@
                 const [blockRes, bondedRes, supplyRes, inflationRes, nodeRes] = await Promise.all([
                     fetch(REST + '/cosmos/base/tendermint/v1beta1/blocks/latest').then(r => r.json()),
                     fetch(REST + '/cosmos/staking/v1beta1/validators?status=BOND_STATUS_BONDED&pagination.limit=200').then(r => r.json()),
-                    fetch(REST + '/cosmos/bank/v1beta1/supply/arai').then(r => r.json()).catch(() => null),
+                    fetch(REST + '/cosmos/bank/v1beta1/supply').then(r => r.json()).catch(() => null),
                     fetch(REST + '/cosmos/mint/v1beta1/inflation').then(r => r.json()).catch(() => null),
                     fetch(REST + '/cosmos/base/tendermint/v1beta1/node_info').then(r => r.json()).catch(() => null)
                 ]);
@@ -1442,9 +1442,12 @@
                 document.getElementById('netBonded').textContent = formatRAI(totalBonded);
 
                 // Total Supply
-                if (supplyRes?.amount?.amount) {
-                    const supply = tokensToRAI(supplyRes.amount.amount);
-                    document.getElementById('netSupply').textContent = supply.toLocaleString(undefined, { maximumFractionDigits: 0 });
+                if (supplyRes?.supply) {
+                    const araiSupply = supplyRes.supply.find(s => s.denom === 'arai');
+                    if (araiSupply) {
+                        const supply = tokensToRAI(araiSupply.amount);
+                        document.getElementById('netSupply').textContent = supply.toLocaleString(undefined, { maximumFractionDigits: 0 });
+                    }
                 }
                 // Inflation
                 if (inflationRes?.inflation) {
