@@ -18,7 +18,7 @@ echo "$LOG_PREFIX wallet=$WALLET_ADDR"
 echo "$LOG_PREFIX validator=$VALOPER_ADDR"
 
 while true; do
-  jobs_json=$(republicd query computevalidation list-job --node "$NODE" --output json 2>/dev/null || echo '{"jobs":[]}')
+  jobs_json=$(republicd query computevalidation list-job --node "$NODE" --output json --limit 500 2>/dev/null || echo '{"jobs":[]}')
 
   python3 - "$jobs_json" "$VALOPER_ADDR" > /tmp/auto_jobs.txt <<'PY'
 import json,sys
