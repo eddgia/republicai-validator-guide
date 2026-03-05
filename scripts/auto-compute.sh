@@ -18,20 +18,18 @@ echo "$LOG_PREFIX wallet=$WALLET_ADDR"
 echo "$LOG_PREFIX validator=$VALOPER_ADDR"
 
 while true; do
-  jobs_json=$(republicd query computevalidation list-job --node "$NODE" --output json --limit 500 2>/dev/null || echo '{"jobs":[]}')
-
-  python3 - "$jobs_json" "$VALOPER_ADDR" > /tmp/auto_jobs.txt <<'PY'
+  republicd query computevalidation list-job --node "$NODE" --output json --limit 500 2>/dev/null | \
+  python3 -c "
 import json,sys
-raw=sys.argv[1]
-val=sys.argv[2]
+val='$VALOPER_ADDR'
 try:
-    data=json.loads(raw)
+    data=json.load(sys.stdin)
 except Exception:
-    data={"jobs":[]}
-for j in data.get("jobs", []):
-    if j.get("target_validator") == val and j.get("status") == "PendingExecution":
-        print(j.get("id", ""))
-PY
+    data={'jobs':[]}
+for j in data.get('jobs', []):
+    if j.get('target_validator') == val and j.get('status') == 'PendingExecution':
+        print(j.get('id', ''))
+" > /tmp/auto_jobs.txt 2>/dev/null
 
   while read -r JOB_ID; do
     [ -z "$JOB_ID" ] && continue
