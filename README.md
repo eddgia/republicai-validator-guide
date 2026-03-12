@@ -2,7 +2,14 @@
 
 > **Complete guide to run a RepublicAI validator with compute jobs on testnet**  
 > Supports both **CPU-only** and **GPU (NVIDIA CUDA)** setups  
-> Network: `raitestnet_77701-1` | Last updated: 2026-03-03
+> Network: `raitestnet_77701-1` | Last updated: 2026-03-12
+
+### Release Notes (2026-03-12)
+
+- Fixed `scripts/auto-compute.sh` job scanning to parse `list-job` via `jq` from stdin, avoiding `Argument list too long` failures.
+- Replaced Python `bech32` patch step with direct validator substitution in generated TX JSON, removing `ModuleNotFoundError: bech32` dependency at runtime.
+- Added safer fallback for job-query failures by writing an empty `/tmp/auto_jobs.txt` and continuing the loop.
+- Related commit: `7da37d4`
 
 ---
 
