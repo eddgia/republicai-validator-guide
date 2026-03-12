@@ -18,18 +18,10 @@ echo "$LOG_PREFIX wallet=$WALLET_ADDR"
 echo "$LOG_PREFIX validator=$VALOPER_ADDR"
 
 while true; do
-  republicd query computevalidation list-job --node "$NODE" --output json --limit 500 2>/dev/null | \
-  python3 -c "
-import json,sys
-val='$VALOPER_ADDR'
-try:
-    data=json.load(sys.stdin)
-except Exception:
-    data={'jobs':[]}
-for j in data.get('jobs', []):
-    if j.get('target_validator') == val and j.get('status') == 'PendingExecution':
-        print(j.get('id', ''))
-" > /tmp/auto_jobs.txt 2>/dev/null
+  if ! republicd query computevalidation list-job --node "$NODE" --output json --limit 500 2>/dev/null | \
+    jq -r --arg v "$VALOPER_ADDR" '.jobs[]? | select(.target_validator==$v and .status=="PendingExecution") | .id' > /tmp/auto_jobs.txt; then
+    : > /tmp/auto_jobs.txt
+  fi
 
   while read -r JOB_ID; do
     [ -z "$JOB_ID" ] && continue
@@ -75,19 +67,10 @@ for j in data.get('jobs', []):
       continue
     fi
 
-    python3 - "$WALLET_ADDR" "/tmp/tx_unsigned_${JOB_ID}.json" <<'PY'
-import bech32, json, sys
-wallet = sys.argv[1]
-path = sys.argv[2]
-hrp, data = bech32.bech32_decode(wallet)
-if data is None:
-    raise SystemExit("invalid_wallet_bech32")
-valoper = bech32.bech32_encode("raivaloper", data)
-tx = json.load(open(path))
-tx["body"]["messages"][0]["validator"] = valoper
-json.dump(tx, open(path, "w"))
-print(valoper)
-PY
+    if ! sed -i "s/\"validator\":\"$WALLET_ADDR\"/\"validator\":\"$VALOPER_ADDR\"/" "/tmp/tx_unsigned_${JOB_ID}.json"; then
+      echo "$LOG_PREFIX validator_patch_failed job=$JOB_ID"
+      continue
+    fi
 
     if ! republicd tx sign "/tmp/tx_unsigned_${JOB_ID}.json" \
       --from "$WALLET_NAME" \
