@@ -106,6 +106,12 @@ if pgrep -x republicd > /dev/null 2>&1; then
                 log "STARTED: auto-compute.sh"
             fi
             
+            # Start cloudflare tunnel and get public URL
+            log "STARTING: Cloudflare tunnel..."
+            nohup bash /home/akonkat/start-cloudflare-tunnel.sh >> /home/akonkat/cf-tunnel-auto.log 2>&1 &
+            disown $! 2>/dev/null
+            log "STARTED: Cloudflare tunnel"
+            
             exit 0
         fi
         sleep 5
