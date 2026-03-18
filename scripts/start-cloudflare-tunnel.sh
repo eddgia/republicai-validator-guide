@@ -10,10 +10,10 @@ pkill -f "cloudflared tunnel" || true
 nohup ~/cloudflared tunnel --url http://localhost:8080 > ~/cf-tunnel.log 2>&1 &
 
 echo "Đang khởi tạo kết nối Cloudflare..."
-sleep 5
+sleep 15
 
 # Trích xuất đường link
-URL=$(grep -o 'https://[^ ]*\.trycloudflare\.com' ~/cf-tunnel.log | head -1)
+URL=$(grep -a -o 'https://[^ ]*\.trycloudflare\.com' ~/cf-tunnel.log | head -1)
 
 if [ -n "$URL" ]; then
     echo "Thành công! Đường link công khai (Public URL) là:"
