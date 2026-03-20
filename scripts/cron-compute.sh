@@ -6,17 +6,24 @@ HOME_DIR="/home/akonkat/.republicd"
 CHAIN_ID="raitestnet_77701-1"
 NODE="tcp://127.0.0.1:26657"
 JOBS_DIR="/home/akonkat/republic-jobs"
-SERVER_BASE="http://127.0.0.1:8080"
+LOG="/home/akonkat/cron-compute.log"
 EXEC_IMAGE="devtools-llm-inference:latest"
 VERIFY_IMAGE="example-verification:latest"
-LOG="/home/akonkat/cron-compute.log"
 
-WALLET_ADDR=$(republicd keys show "$WALLET" --address --home "$HOME_DIR" --keyring-backend test 2>/dev/null)
-VALOPER_ADDR=$(republicd keys show "$WALLET" --bech val --address --home "$HOME_DIR" --keyring-backend test 2>/dev/null)
+# Get fresh cloudflared URL
+SERVER_BASE=$(grep -oP 'https://[a-z0-9-]+\.trycloudflare\.com' /home/akonkat/cloudflared.log | tail -1)
+if [ -z "$SERVER_BASE" ]; then
+  echo "ERROR: No cloudflared tunnel URL found" >> "$LOG"
+  exit 1
+fi
 
 echo "" >> "$LOG"
 echo "======== $(date) ========" >> "$LOG"
+echo "Tunnel URL: $SERVER_BASE" >> "$LOG"
 echo "Creating + computing job..." >> "$LOG"
+
+WALLET_ADDR=$(republicd keys show "$WALLET" --address --home "$HOME_DIR" --keyring-backend test 2>/dev/null)
+VALOPER_ADDR=$(republicd keys show "$WALLET" --bech val --address --home "$HOME_DIR" --keyring-backend test 2>/dev/null)
 
 # 1. Create job
 CREATE_OUT=$(republicd tx computevalidation submit-job \
@@ -31,27 +38,42 @@ echo "Create TX: ${TXHASH:-failed}" >> "$LOG"
 
 sleep 12
 
-# Get job ID
+# Get job ID - FIXED: parse from events directly AND from text output
 JOB_ID=$(republicd query tx "$TXHASH" --node "$NODE" --output json 2>/dev/null | python3 -c "
-import json,sys
+import json, sys
 try:
-    d=json.load(sys.stdin)
-    for l in d.get('logs',[]):
-        for e in l.get('events',[]):
-            if e.get('type')=='job_submitted':
-                for a in e.get('attributes',[]):
-                    if a.get('key')=='job_id': print(a['value']); sys.exit(0)
-except: pass
+    d = json.load(sys.stdin)
+    for e in d.get('events', []):
+        if e.get('type') == 'job_submitted':
+            for a in e.get('attributes', []):
+                if a.get('key') == 'job_id':
+                    print(a['value'])
+                    sys.exit(0)
+    for l in d.get('logs', []):
+        for e in l.get('events', []):
+            if e.get('type') == 'job_submitted':
+                for a in e.get('attributes', []):
+                    if a.get('key') == 'job_id':
+                        print(a['value'])
+                        sys.exit(0)
+except:
+    pass
 " 2>/dev/null)
 
 if [ -z "$JOB_ID" ]; then
-  # Fallback: find latest pending job
+  # Fallback: parse from text output
+  JOB_ID=$(republicd query tx "$TXHASH" --node "$NODE" 2>/dev/null | grep -A1 'key: job_id' | grep 'value:' | awk '{print $2}' | tr -d '"')
+fi
+
+if [ -z "$JOB_ID" ]; then
+  # Fallback 2: find latest pending job
   JOB_ID=$(republicd query computevalidation list-job --node "$NODE" --output json 2>/dev/null | python3 -c "
-import json,sys
-d=json.load(sys.stdin)
-val='$VALOPER_ADDR'
-pending=[j for j in d.get('jobs',[]) if j.get('target_validator')==val and j.get('status')=='PendingExecution']
-if pending: print(pending[-1]['id'])
+import json, sys
+d = json.load(sys.stdin)
+val = '$VALOPER_ADDR'
+pending = [j for j in d.get('jobs', []) if j.get('target_validator') == val and j.get('status') == 'PendingExecution']
+if pending:
+    print(pending[-1]['id'])
 " 2>/dev/null)
 fi
 
@@ -72,7 +94,7 @@ if [ ! -f "$RESULT_FILE" ]; then
   exit 1
 fi
 
-SHA256=$(python3 -c "import hashlib;print(hashlib.sha256(open('$RESULT_FILE','rb').read()).hexdigest())")
+SHA256=$(python3 -c "import hashlib; print(hashlib.sha256(open('$RESULT_FILE','rb').read()).hexdigest())")
 echo "SHA256: $SHA256" >> "$LOG"
 
 # 3. Submit result (with bech32 fix)
